@@ -4,8 +4,8 @@
 package di
 
 import (
-	service "videoStreaming/pkg/api"
-	api "videoStreaming/pkg/api/service"
+	api "videoStreaming/pkg/api"
+	"videoStreaming/pkg/api/service"
 	"videoStreaming/pkg/config"
 	"videoStreaming/pkg/db"
 	repository "videoStreaming/pkg/respository"

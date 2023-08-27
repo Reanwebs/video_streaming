@@ -12,7 +12,7 @@ service VideoService {
 
 message UploadVideoRequest {
     string filename = 1;
-  bytes data = 2;
+    bytes data = 2;
 }
 
 message UploadVideoResponse{
