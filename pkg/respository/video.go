@@ -18,11 +18,15 @@ func NewVideoRepo(db *gorm.DB) interfaces.VideoRepo {
 	}
 }
 
-func (c *videoRepo) CreateVideoid(videoid string) error {
-	if err := c.DB.Create(&domain.Video{VideoId: videoid}).Error; err != nil {
-		return err
+func (c *videoRepo) CreateVideoid(videoid string, path string) (string, error) {
+	err := c.DB.Create(&domain.Video{
+		VideoId: videoid,
+		S3Path:  path,
+	}).Error
+	if err != nil {
+		return "", err
 	}
-	return nil
+	return videoid, nil
 }
 
 func (c *videoRepo) FindAllVideo() ([]*pb.VideoID, error) {

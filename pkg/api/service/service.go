@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -13,8 +14,10 @@ import (
 	"videoStreaming/pkg/respository/interfaces"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
@@ -38,6 +41,7 @@ func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) erro
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %s", err)
 	}
+
 	// Create a new AWS session with the loaded access keys
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("ap-south-1"),
@@ -46,83 +50,46 @@ func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) erro
 			os.Getenv("AWS_SECRET_ACCESS_KEY"),
 			"",
 		),
-		LogLevel: aws.LogLevel(aws.LogDebugWithHTTPBody),
+
+		// LogLevel: aws.LogLevel(aws.LogDebugWithHTTPBody),
 	})
 	if err != nil {
 		return err
 	}
-	fmt.Println("\n\n\n", sess, "\n\n\n.")
 	// Create an S3 uploader with the session and default options
 	uploader := s3manager.NewUploader(sess)
 
 	fileuid := uuid.New()
 	fileName := fileuid.String()
-	folderpath := storageLocation + "/" + fileName
-	filepath := folderpath + "/" + fileName + ".mp4"
 
-	if err := os.MkdirAll(folderpath, 0755); err != nil {
-		return err
-	}
-
-	newfile, err1 := os.Create(filepath)
-	if err1 != nil {
-		return err1
-	}
-	defer newfile.Close()
-
-	//receiving from the streamed bytes from the api_gateway
-	for {
-		chunk, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		if _, err := newfile.Write(chunk.Data); err != nil {
-			return err
-		}
-	}
+	var buffer bytes.Buffer
 
 	s3Path := "reanweb/" + fileName + ".mp4"
+
+	// Upload the video data from the buffer to S3
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String("reanweb"),
 		Key:    aws.String(s3Path),
-		Body:   newfile,
+		Body:   bytes.NewReader(buffer.Bytes()),
 	})
 	if err != nil {
-		fmt.Println(
-			"config.AWS_ACCESS_KEY_ID\t", os.Getenv("AWS_ACCESS_KEY_ID"),
-			"\nconfig.AWS_SECRET_ACCESS_KEY\t", os.Getenv("AWS_SECRET_ACCESS_KEY"),
-		)
 		fmt.Println("error here")
 		return err
 	}
 
-	chanerr := make(chan error, 2)
-	go func() {
-		//call to segment the file to hls format using ffmpeg
-		err := CreatePlaylistAndSegments(filepath, folderpath)
-		chanerr <- err
-	}()
-	go func() {
-		//saving the video id to a database
-		err := c.Repo.CreateVideoid(fileName)
-		chanerr <- err
-	}()
-	for i := 1; i <= 2; i++ {
-		err := <-chanerr
-		if err != nil {
-			return err
-		}
+	// Saving the video id to a database
+	video_id, err := c.Repo.CreateVideoid(fileName, s3Path)
+	if err != nil {
+		fmt.Println("\n\n..\t\t", err)
+		return err
 	}
 
-	// sending a response and closing the sending stream of bytes
+	fmt.Println("err nil", video_id)
+	// Sending a response and closing the sending stream of bytes
 	return stream.SendAndClose(&pb.UploadVideoResponse{
 		Status:  http.StatusOK,
 		Message: "Video successfully uploaded.",
-		VideoId: fileName,
+		VideoId: video_id,
 	})
 }
 
@@ -150,12 +117,71 @@ func (c *VideoServer) StreamVideo(req *pb.StreamVideoRequest, stream pb.VideoSer
 	return nil
 }
 
-// to find all the video id
 func (c *VideoServer) FindAllVideo(ctx context.Context, req *pb.FindAllRequest) (*pb.FindAllResponse, error) {
+	// res, err := c.Repo.FindAllVideo()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// return &pb.FindAllResponse{
+	// 	Status: http.StatusOK,
+	// 	Videos: res,
+	// }, nil
+	// Set your AWS credentials
+	// \AWS_REGION=ap-south-1
+	// AWS_ACCESS_KEY_ID=AKIARQS5LHBSUWBUPHPM
+	// AWS_SECRET_ACCESS_KEY=tf3hsQxBLxpFLeS+fLycrjzwwo4+XIDKztcj2rok
+	creds := credentials.NewStaticCredentials("AKIARQS5LHBSUWBUPHPM", "tf3hsQxBLxpFLeS+fLycrjzwwo4+XIDKztcj2rok", "")
+
+	// Create a new session using your credentials
+	sess := session.Must(session.NewSession(&aws.Config{
+		Credentials: creds,
+		Region:      aws.String("ap-south-1"), // Change to your desired region
+	}))
+
+	// Create an S3 client
+	s3Client := s3.New(sess)
+
+	// Specify the bucket and object key
+	bucketName := "reanweb"
+	objectKey := "reanweb/7cd03aef-21f3-41e5-b235-21ccdd5c9152.mp4"
+
+	// Create a file to save the downloaded video
+	file, err := os.Create("downloaded_video.mp4")
+	if err != nil {
+		fmt.Println("Error creating file:", err)
+		return nil, err
+	}
+	defer file.Close()
+
+	// Get the video object from S3
+	getObjectInput := &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	}
+
+	// Download the object and write it to the file
+	result, err := s3Client.GetObject(getObjectInput)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == s3.ErrCodeNoSuchKey {
+			fmt.Println("Object not found:", err)
+		} else {
+			fmt.Println("Error downloading object:", err)
+		}
+		return nil, err
+	}
+	defer result.Body.Close()
+
+	_, err = file.ReadFrom(result.Body)
+	if err != nil {
+		fmt.Println("Error writing to file:", err)
+		return nil, err
+	}
+
 	res, err := c.Repo.FindAllVideo()
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Video downloaded successfully!")
 	return &pb.FindAllResponse{
 		Status: http.StatusOK,
 		Videos: res,
