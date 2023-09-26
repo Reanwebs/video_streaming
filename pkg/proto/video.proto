@@ -8,7 +8,7 @@ service VideoService {
     rpc HealthCheck(Request) returns (Response);
     rpc UploadVideo(stream UploadVideoRequest) returns (UploadVideoResponse) {}
     rpc FindArchivedVideoByUserId(FindArchivedVideoByUserIdRequest) returns (FindArchivedVideoByUserIdResponse) {}
-    rpc FindVideoByUserID(FindVideoByUserIDRequest) returns (FindVideoByUserIDResponse) {}
+    rpc FindUserVideo(FindUserVideoRequest) returns (FindUserVideoResponse) {}
     rpc ArchiveVideo(ArchiveVideoRequest) returns (ArchiveVideoResponse) {}
 }
 
@@ -48,7 +48,7 @@ message StreamVideoResponse {
 }
 
 message FindArchivedVideoByUserIdRequest {
-    string userId = 1;
+    string userName = 1;
 }
 
 message FetchVideo {
@@ -58,17 +58,18 @@ message FetchVideo {
     string intrest = 4;
     string thumbnailId = 5;
     string title = 6;
+    string S3Path = 7;
 }
 
 message FindArchivedVideoByUserIdResponse {
     repeated FetchVideo videos = 1;
 }
 
-message FindVideoByUserIDRequest {
-    string userId =1;
+message FindUserVideoRequest {
+    string userName =1;
 }
 
-message FindVideoByUserIDResponse {
+message FindUserVideoResponse {
     repeated FetchVideo videos = 1;
 }
 

@@ -1,7 +1,10 @@
 package interfaces
 
-import "videoStreaming/pkg/domain"
+import (
+	"videoStreaming/pkg/domain"
+)
 
 type VideoRepo interface {
-	CreateVideoid(domain.ToSaveVideo) (string, error)
+	CreateVideoid(domain.ToSaveVideo) (bool, error)
+	FetchUserVideos(string) ([]*domain.Video, error)
 }
