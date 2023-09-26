@@ -18,9 +18,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VideoServiceClient interface {
+	HealthCheck(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 	UploadVideo(ctx context.Context, opts ...grpc.CallOption) (VideoService_UploadVideoClient, error)
-	StreamVideo(ctx context.Context, in *StreamVideoRequest, opts ...grpc.CallOption) (VideoService_StreamVideoClient, error)
-	FindAllVideo(ctx context.Context, in *FindAllRequest, opts ...grpc.CallOption) (*FindAllResponse, error)
+	FindArchivedVideoByUserId(ctx context.Context, in *FindArchivedVideoByUserIdRequest, opts ...grpc.CallOption) (*FindArchivedVideoByUserIdResponse, error)
+	FindVideoByUserID(ctx context.Context, in *FindVideoByUserIDRequest, opts ...grpc.CallOption) (*FindVideoByUserIDResponse, error)
+	ArchiveVideo(ctx context.Context, in *ArchiveVideoRequest, opts ...grpc.CallOption) (*ArchiveVideoResponse, error)
 }
 
 type videoServiceClient struct {
@@ -29,6 +31,15 @@ type videoServiceClient struct {
 
 func NewVideoServiceClient(cc grpc.ClientConnInterface) VideoServiceClient {
 	return &videoServiceClient{cc}
+}
+
+func (c *videoServiceClient) HealthCheck(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/pb.VideoService/HealthCheck", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *videoServiceClient) UploadVideo(ctx context.Context, opts ...grpc.CallOption) (VideoService_UploadVideoClient, error) {
@@ -65,41 +76,27 @@ func (x *videoServiceUploadVideoClient) CloseAndRecv() (*UploadVideoResponse, er
 	return m, nil
 }
 
-func (c *videoServiceClient) StreamVideo(ctx context.Context, in *StreamVideoRequest, opts ...grpc.CallOption) (VideoService_StreamVideoClient, error) {
-	stream, err := c.cc.NewStream(ctx, &VideoService_ServiceDesc.Streams[1], "/pb.VideoService/StreamVideo", opts...)
+func (c *videoServiceClient) FindArchivedVideoByUserId(ctx context.Context, in *FindArchivedVideoByUserIdRequest, opts ...grpc.CallOption) (*FindArchivedVideoByUserIdResponse, error) {
+	out := new(FindArchivedVideoByUserIdResponse)
+	err := c.cc.Invoke(ctx, "/pb.VideoService/FindArchivedVideoByUserId", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &videoServiceStreamVideoClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
+	return out, nil
+}
+
+func (c *videoServiceClient) FindVideoByUserID(ctx context.Context, in *FindVideoByUserIDRequest, opts ...grpc.CallOption) (*FindVideoByUserIDResponse, error) {
+	out := new(FindVideoByUserIDResponse)
+	err := c.cc.Invoke(ctx, "/pb.VideoService/FindVideoByUserID", in, out, opts...)
+	if err != nil {
 		return nil, err
 	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
+	return out, nil
 }
 
-type VideoService_StreamVideoClient interface {
-	Recv() (*StreamVideoResponse, error)
-	grpc.ClientStream
-}
-
-type videoServiceStreamVideoClient struct {
-	grpc.ClientStream
-}
-
-func (x *videoServiceStreamVideoClient) Recv() (*StreamVideoResponse, error) {
-	m := new(StreamVideoResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *videoServiceClient) FindAllVideo(ctx context.Context, in *FindAllRequest, opts ...grpc.CallOption) (*FindAllResponse, error) {
-	out := new(FindAllResponse)
-	err := c.cc.Invoke(ctx, "/pb.VideoService/FindAllVideo", in, out, opts...)
+func (c *videoServiceClient) ArchiveVideo(ctx context.Context, in *ArchiveVideoRequest, opts ...grpc.CallOption) (*ArchiveVideoResponse, error) {
+	out := new(ArchiveVideoResponse)
+	err := c.cc.Invoke(ctx, "/pb.VideoService/ArchiveVideo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,9 +107,11 @@ func (c *videoServiceClient) FindAllVideo(ctx context.Context, in *FindAllReques
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility
 type VideoServiceServer interface {
+	HealthCheck(context.Context, *Request) (*Response, error)
 	UploadVideo(VideoService_UploadVideoServer) error
-	StreamVideo(*StreamVideoRequest, VideoService_StreamVideoServer) error
-	FindAllVideo(context.Context, *FindAllRequest) (*FindAllResponse, error)
+	FindArchivedVideoByUserId(context.Context, *FindArchivedVideoByUserIdRequest) (*FindArchivedVideoByUserIdResponse, error)
+	FindVideoByUserID(context.Context, *FindVideoByUserIDRequest) (*FindVideoByUserIDResponse, error)
+	ArchiveVideo(context.Context, *ArchiveVideoRequest) (*ArchiveVideoResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -120,14 +119,20 @@ type VideoServiceServer interface {
 type UnimplementedVideoServiceServer struct {
 }
 
+func (UnimplementedVideoServiceServer) HealthCheck(context.Context, *Request) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
+}
 func (UnimplementedVideoServiceServer) UploadVideo(VideoService_UploadVideoServer) error {
 	return status.Errorf(codes.Unimplemented, "method UploadVideo not implemented")
 }
-func (UnimplementedVideoServiceServer) StreamVideo(*StreamVideoRequest, VideoService_StreamVideoServer) error {
-	return status.Errorf(codes.Unimplemented, "method StreamVideo not implemented")
+func (UnimplementedVideoServiceServer) FindArchivedVideoByUserId(context.Context, *FindArchivedVideoByUserIdRequest) (*FindArchivedVideoByUserIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindArchivedVideoByUserId not implemented")
 }
-func (UnimplementedVideoServiceServer) FindAllVideo(context.Context, *FindAllRequest) (*FindAllResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindAllVideo not implemented")
+func (UnimplementedVideoServiceServer) FindVideoByUserID(context.Context, *FindVideoByUserIDRequest) (*FindVideoByUserIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindVideoByUserID not implemented")
+}
+func (UnimplementedVideoServiceServer) ArchiveVideo(context.Context, *ArchiveVideoRequest) (*ArchiveVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ArchiveVideo not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 
@@ -140,6 +145,24 @@ type UnsafeVideoServiceServer interface {
 
 func RegisterVideoServiceServer(s grpc.ServiceRegistrar, srv VideoServiceServer) {
 	s.RegisterService(&VideoService_ServiceDesc, srv)
+}
+
+func _VideoService_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).HealthCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.VideoService/HealthCheck",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).HealthCheck(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _VideoService_UploadVideo_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -168,41 +191,56 @@ func (x *videoServiceUploadVideoServer) Recv() (*UploadVideoRequest, error) {
 	return m, nil
 }
 
-func _VideoService_StreamVideo_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(StreamVideoRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(VideoServiceServer).StreamVideo(m, &videoServiceStreamVideoServer{stream})
-}
-
-type VideoService_StreamVideoServer interface {
-	Send(*StreamVideoResponse) error
-	grpc.ServerStream
-}
-
-type videoServiceStreamVideoServer struct {
-	grpc.ServerStream
-}
-
-func (x *videoServiceStreamVideoServer) Send(m *StreamVideoResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _VideoService_FindAllVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FindAllRequest)
+func _VideoService_FindArchivedVideoByUserId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindArchivedVideoByUserIdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VideoServiceServer).FindAllVideo(ctx, in)
+		return srv.(VideoServiceServer).FindArchivedVideoByUserId(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.VideoService/FindAllVideo",
+		FullMethod: "/pb.VideoService/FindArchivedVideoByUserId",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VideoServiceServer).FindAllVideo(ctx, req.(*FindAllRequest))
+		return srv.(VideoServiceServer).FindArchivedVideoByUserId(ctx, req.(*FindArchivedVideoByUserIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VideoService_FindVideoByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindVideoByUserIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).FindVideoByUserID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.VideoService/FindVideoByUserID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).FindVideoByUserID(ctx, req.(*FindVideoByUserIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VideoService_ArchiveVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArchiveVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).ArchiveVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.VideoService/ArchiveVideo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).ArchiveVideo(ctx, req.(*ArchiveVideoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -215,8 +253,20 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*VideoServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "FindAllVideo",
-			Handler:    _VideoService_FindAllVideo_Handler,
+			MethodName: "HealthCheck",
+			Handler:    _VideoService_HealthCheck_Handler,
+		},
+		{
+			MethodName: "FindArchivedVideoByUserId",
+			Handler:    _VideoService_FindArchivedVideoByUserId_Handler,
+		},
+		{
+			MethodName: "FindVideoByUserID",
+			Handler:    _VideoService_FindVideoByUserID_Handler,
+		},
+		{
+			MethodName: "ArchiveVideo",
+			Handler:    _VideoService_ArchiveVideo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
@@ -224,11 +274,6 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "UploadVideo",
 			Handler:       _VideoService_UploadVideo_Handler,
 			ClientStreams: true,
-		},
-		{
-			StreamName:    "StreamVideo",
-			Handler:       _VideoService_StreamVideo_Handler,
-			ServerStreams: true,
 		},
 	},
 	Metadata: "pkg/proto/video.proto",

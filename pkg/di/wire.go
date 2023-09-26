@@ -4,8 +4,8 @@
 package di
 
 import (
-	service "videoStreaming/pkg/api"
-	api "videoStreaming/pkg/api/service"
+	api "videoStreaming/pkg/api"
+	"videoStreaming/pkg/api/service"
 	"videoStreaming/pkg/config"
 	"videoStreaming/pkg/db"
 	repository "videoStreaming/pkg/respository"
@@ -14,6 +14,10 @@ import (
 )
 
 func InitializeServe(c *config.Config) (*api.Server, error) {
-	wire.Build(db.Initdb, repository.NewVideoRepo, service.NewVideoServer, api.NewgrpcServe)
+	wire.Build(db.Initdb,
+		repository.NewVideoRepo,
+		service.NewVideoServer,
+		api.NewGrpcServe,
+	)
 	return &api.Server{}, nil
 }

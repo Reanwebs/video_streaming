@@ -1,35 +1,103 @@
-package api
+package service
 
 import (
+	"bytes"
+	"context"
+	"errors"
 	"fmt"
-	"net"
-	"videoStreaming/pkg/config"
+	"io"
+	"net/http"
+	"videoStreaming/pkg/domain"
 	"videoStreaming/pkg/pb"
+	"videoStreaming/pkg/respository/interfaces"
+	"videoStreaming/pkg/utils"
 
-	"google.golang.org/grpc"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/google/uuid"
 )
 
-type Server struct {
-	gs   *grpc.Server
-	Lis  net.Listener
-	Port string
+const storageLocation = "storage"
+
+type VideoServer struct {
+	Repo interfaces.VideoRepo
+	pb.VideoServiceServer
 }
 
-func NewgrpcServe(c *config.Config, service pb.VideoServiceServer) (*Server, error) {
-	grpcserver := grpc.NewServer()
-	pb.RegisterVideoServiceServer(grpcserver, service)
-	lis, err := net.Listen("tcp", c.Port)
-	if err != nil {
-		return nil, err
+func NewVideoServer(repo interfaces.VideoRepo) pb.VideoServiceServer {
+	return &VideoServer{
+		Repo: repo,
 	}
-	return &Server{
-		gs:   grpcserver,
-		Lis:  lis,
-		Port: c.Port,
-	}, nil
 }
 
-func (s *Server) Start() error {
-	fmt.Println("Video service on:", s.Port)
-	return s.gs.Serve(s.Lis)
+func (c *VideoServer) HealthCheck(ctx context.Context, input *pb.Request) (*pb.Response, error) {
+
+	if input == nil {
+		return nil, errors.New("empty input")
+	}
+	a := &pb.Response{
+		Result: "success",
+	}
+	return a, nil
+}
+
+func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) error {
+
+	var uploadData *pb.UploadVideoRequest
+	var buffer bytes.Buffer
+
+	uploadData, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+
+	for {
+		chunk, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		_, err = buffer.Write(chunk.Data)
+		if err != nil {
+			return err
+		}
+	}
+
+	fileUID := uuid.New()
+	fileName := fileUID.String()
+	s3Path := "reanweb/" + fileName + ".mp4"
+
+	err = utils.UploadVideoToS3(buffer.Bytes(), s3Path)
+	if err != nil {
+		fmt.Println("Error uploading video to S3:", err)
+		if awsErr, ok := err.(awserr.Error); ok {
+			fmt.Println("AWS Error Code:", awsErr.Code())
+			fmt.Println("AWS Error Message:", awsErr.Message())
+		}
+		return err
+	}
+	request := domain.ToSaveVideo{
+		S3Path:      s3Path,
+		UserName:    uploadData.UserName,
+		AvatarId:    uploadData.AvatarId,
+		Title:       uploadData.ThumbnailId,
+		Discription: uploadData.Discription,
+		Interest:    uploadData.Intrest,
+		ThumbnailId: uploadData.ThumbnailId,
+	}
+
+	videoID, err := c.Repo.CreateVideoid(request)
+	if err != nil {
+		fmt.Println("Error saving video ID:", err)
+		return err
+	}
+
+	fmt.Println("Video ID:", videoID)
+
+	return stream.SendAndClose(&pb.UploadVideoResponse{
+		Status:  http.StatusOK,
+		Message: "Video successfully uploaded.",
+		VideoId: videoID,
+	})
 }
