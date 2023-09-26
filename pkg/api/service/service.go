@@ -46,16 +46,14 @@ func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) erro
 	s3Path := "reanweb/" + fileName + ".mp4"
 
 	for {
-		// Receive the next message from the client
 		uploadData, err := stream.Recv()
 		if err == io.EOF {
-			break // End of stream
+			break
 		}
 		if err != nil {
 			return err
 		}
 
-		// Process the received message and populate the request struct
 		request = domain.ToSaveVideo{
 			UserName:    uploadData.UserName,
 			AvatarId:    uploadData.AvatarId,
@@ -65,31 +63,24 @@ func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) erro
 			ThumbnailId: uploadData.ThumbnailId,
 		}
 
-		// Append the received data to the buffer
 		_, err = buffer.Write(uploadData.Data)
 		if err != nil {
 			return err
 		}
 	}
 
-	// Upload the video data to S3
 	err := utils.UploadVideoToS3(buffer.Bytes(), s3Path)
 	if err != nil {
-		// Handle the error
 		return err
 	}
 
-	// Set the S3Path in the request
 	request.S3Path = s3Path
 
-	// Create the video record and get the video ID
 	_, err = c.Repo.CreateVideoid(request)
 	if err != nil {
-		// Handle the error
 		return err
 	}
 
-	// Sending a response and closing the sending stream of bytes
 	return stream.SendAndClose(&pb.UploadVideoResponse{
 		Status:  http.StatusOK,
 		Message: "Video successfully uploaded.",
@@ -106,6 +97,7 @@ func (c *VideoServer) FindUserVideo(ctx context.Context, input *pb.FindUserVideo
 	data := make([]*pb.FetchVideo, len(res))
 	for i, v := range res {
 		data[i] = &pb.FetchVideo{
+			VideoId:     uint32(v.ID),
 			AvatarId:    v.Avatar_id,
 			S3Path:      v.S3_path,
 			UserName:    v.User_name,
@@ -119,4 +111,42 @@ func (c *VideoServer) FindUserVideo(ctx context.Context, input *pb.FindUserVideo
 		Videos: data,
 	}
 	return response, err
+}
+
+func (c *VideoServer) FindArchivedVideoByUserId(ctx context.Context, input *pb.FindArchivedVideoByUserIdRequest) (*pb.FindArchivedVideoByUserIdResponse, error) {
+	res, err := c.Repo.FindArchivedVideos(input.UserName)
+	if err != nil {
+		return nil, err
+	}
+
+	data := make([]*pb.FetchVideo, len(res))
+	for i, v := range res {
+		data[i] = &pb.FetchVideo{
+			VideoId:     uint32(v.ID),
+			AvatarId:    v.Avatar_id,
+			S3Path:      v.S3_path,
+			UserName:    v.User_name,
+			ThumbnailId: v.Thumbnail_id,
+			Title:       v.Title,
+			Intrest:     v.Interest,
+		}
+	}
+
+	response := &pb.FindArchivedVideoByUserIdResponse{
+		Videos: data,
+	}
+	return response, err
+}
+
+func (c *VideoServer) ArchiveVideo(ctx context.Context, input *pb.ArchiveVideoRequest) (*pb.ArchiveVideoResponse, error) {
+
+	res, err := c.Repo.ArchivedVideos(uint(input.VideoId))
+	if err != nil {
+		return nil, err
+	}
+	response := &pb.ArchiveVideoResponse{
+		Status: res,
+	}
+	return response, err
+
 }

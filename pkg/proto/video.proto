@@ -52,7 +52,7 @@ message FindArchivedVideoByUserIdRequest {
 }
 
 message FetchVideo {
-    string VideoId = 1;
+    uint32 VideoId = 1;
     string userName = 2;
     string avatarId = 3;
     string intrest = 4;
@@ -74,7 +74,7 @@ message FindUserVideoResponse {
 }
 
 message ArchiveVideoRequest {
-    string videoId = 1;
+    uint32 videoId = 1;
 }
 message ArchiveVideoResponse{
     bool status = 1;
