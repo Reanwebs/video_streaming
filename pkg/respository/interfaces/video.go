@@ -1,8 +1,7 @@
 package interfaces
 
-import "videoStreaming/pkg/pb"
+import "videoStreaming/pkg/domain"
 
 type VideoRepo interface {
-	CreateVideoid(string, string) (string, error)
-	FindAllVideo() ([]*pb.VideoID, error)
+	CreateVideoid(domain.ToSaveVideo) (string, error)
 }

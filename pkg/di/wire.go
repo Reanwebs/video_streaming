@@ -14,6 +14,10 @@ import (
 )
 
 func InitializeServe(c *config.Config) (*api.Server, error) {
-	wire.Build(db.Initdb, repository.NewVideoRepo, service.NewVideoServer, api.NewgrpcServe)
+	wire.Build(db.Initdb,
+		repository.NewVideoRepo,
+		service.NewVideoServer,
+		api.NewGrpcServe,
+	)
 	return &api.Server{}, nil
 }
