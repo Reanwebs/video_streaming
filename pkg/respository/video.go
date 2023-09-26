@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
+	"strings"
 	"videoStreaming/pkg/domain"
 	"videoStreaming/pkg/respository/interfaces"
 
@@ -17,31 +20,41 @@ func NewVideoRepo(db *gorm.DB) interfaces.VideoRepo {
 	}
 }
 
-func (c *videoRepo) CreateVideoid(input domain.ToSaveVideo) (string, error) {
-	// Create a new Video record using the input data
+func (c *videoRepo) CreateVideoid(input domain.ToSaveVideo) (bool, error) {
+	// Clean up the input.UserName by removing unwanted symbols
+	cleanedUserName := strings.Replace(input.UserName, "\"", "", -1)
+
+	// Create a new Video record using the cleaned username
 	video := &domain.Video{
-		S3Path:      input.S3Path,
-		UserName:    input.UserName,
-		AvatarId:    input.AvatarId,
-		Title:       input.Title,
-		Discription: input.Discription,
-		Interest:    input.Interest,
-		ThumbnailId: input.ThumbnailId,
+		S3_path:      input.S3Path,
+		User_name:    cleanedUserName,
+		Avatar_id:    input.AvatarId,
+		Title:        input.Title,
+		Discription:  input.Discription,
+		Interest:     input.Intrest,
+		Thumbnail_id: input.ThumbnailId,
 	}
 
 	if err := c.DB.Create(video).Error; err != nil {
-		return "", err
+		return false, err
 	}
 
-	videoId := video.VideoId
-
-	return videoId, nil
+	return true, nil
 }
 
-// func (c *videoRepo) FindAllVideo() ([]*pb.VideoID, error) {
-// 	var videoid []*pb.VideoID
-// 	if err := c.DB.Model(&domain.Video{}).Find(&videoid).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return videoid, nil
-// }
+func (c *videoRepo) FetchUserVideos(userName string) ([]*domain.Video, error) {
+	var data []*domain.Video
+	if err := c.DB.Model(&domain.Video{}).
+		Where("user_name = ? AND archived = ?", userName, false).
+		Find(&data).
+		Error; err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		fmt.Println("fetching empty array")
+		return []*domain.Video{}, errors.New("there is novideo")
+	}
+
+	return data, nil
+}
