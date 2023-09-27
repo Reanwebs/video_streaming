@@ -104,6 +104,7 @@ func (c *VideoServer) FindUserVideo(ctx context.Context, input *pb.FindUserVideo
 			ThumbnailId: v.Thumbnail_id,
 			Title:       v.Title,
 			Intrest:     v.Interest,
+			Archived:    v.Archived,
 		}
 	}
 
@@ -129,10 +130,37 @@ func (c *VideoServer) FindArchivedVideoByUserId(ctx context.Context, input *pb.F
 			ThumbnailId: v.Thumbnail_id,
 			Title:       v.Title,
 			Intrest:     v.Interest,
+			Archived:    v.Archived,
 		}
 	}
 
 	response := &pb.FindArchivedVideoByUserIdResponse{
+		Videos: data,
+	}
+	return response, err
+}
+
+func (c *VideoServer) FetchAllVideos(ctx context.Context, input *pb.FetchAllVideoRequest) (*pb.FetchAllVideoResponse, error) {
+
+	res, err := c.Repo.FetchAllVideos()
+	if err != nil {
+		return nil, err
+	}
+	data := make([]*pb.FetchVideo, len(res))
+	for i, v := range res {
+		data[i] = &pb.FetchVideo{
+			VideoId:     uint32(v.ID),
+			AvatarId:    v.Avatar_id,
+			S3Path:      v.S3_path,
+			UserName:    v.User_name,
+			ThumbnailId: v.Thumbnail_id,
+			Title:       v.Title,
+			Intrest:     v.Interest,
+			Archived:    v.Archived,
+		}
+	}
+
+	response := &pb.FetchAllVideoResponse{
 		Videos: data,
 	}
 	return response, err

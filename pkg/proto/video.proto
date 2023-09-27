@@ -10,8 +10,8 @@ service VideoService {
     rpc FindArchivedVideoByUserId(FindArchivedVideoByUserIdRequest) returns (FindArchivedVideoByUserIdResponse) {}
     rpc FindUserVideo(FindUserVideoRequest) returns (FindUserVideoResponse) {}
     rpc ArchiveVideo(ArchiveVideoRequest) returns (ArchiveVideoResponse) {}
+    rpc FetchAllVideo(FetchAllVideoRequest) returns (FetchAllVideoResponse) {}
 }
-
 
 message Request {
     string data = 1;
@@ -59,6 +59,7 @@ message FetchVideo {
     string thumbnailId = 5;
     string title = 6;
     string S3Path = 7;
+    bool archived = 8;
 }
 
 message FindArchivedVideoByUserIdResponse {
@@ -72,6 +73,15 @@ message FindUserVideoRequest {
 message FindUserVideoResponse {
     repeated FetchVideo videos = 1;
 }
+
+message FetchAllVideoRequest {
+
+}
+
+message FetchAllVideoResponse {
+    repeated FetchVideo videos = 1;
+}
+
 
 message ArchiveVideoRequest {
     uint32 videoId = 1;
