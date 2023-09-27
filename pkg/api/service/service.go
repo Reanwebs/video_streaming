@@ -179,3 +179,23 @@ func (c *VideoServer) ArchiveVideo(ctx context.Context, input *pb.ArchiveVideoRe
 	return response, err
 
 }
+
+func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRequest) (*pb.GetVideoByIdResponse, error) {
+
+	res, err := c.Repo.GetVideoById(uint(input.VideoId))
+	if err != nil {
+		return nil, err
+	}
+	response := &pb.GetVideoByIdResponse{
+		VideoId:     uint32(res.ID),
+		UserName:    res.User_name,
+		AvatarId:    res.Avatar_id,
+		Archived:    res.Archived,
+		Intrest:     res.Interest,
+		ThumbnailId: res.Thumbnail_id,
+		Title:       res.Title,
+		S3Path:      res.S3_path,
+	}
+	return response, err
+
+}
