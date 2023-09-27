@@ -51,7 +51,6 @@ func (c *videoRepo) FetchUserVideos(userName string) ([]*domain.Video, error) {
 		fmt.Println("Fetching empty array")
 		return []*domain.Video{}, nil
 	}
-
 	return data, nil
 }
 

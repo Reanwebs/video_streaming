@@ -140,7 +140,7 @@ func (c *VideoServer) FindArchivedVideoByUserId(ctx context.Context, input *pb.F
 	return response, err
 }
 
-func (c *VideoServer) FetchAllVideos(ctx context.Context, input *pb.FetchAllVideoRequest) (*pb.FetchAllVideoResponse, error) {
+func (c *VideoServer) FetchAllVideo(ctx context.Context, input *pb.FetchAllVideoRequest) (*pb.FetchAllVideoResponse, error) {
 
 	res, err := c.Repo.FetchAllVideos()
 	if err != nil {
@@ -163,6 +163,7 @@ func (c *VideoServer) FetchAllVideos(ctx context.Context, input *pb.FetchAllVide
 	response := &pb.FetchAllVideoResponse{
 		Videos: data,
 	}
+
 	return response, err
 }
 
