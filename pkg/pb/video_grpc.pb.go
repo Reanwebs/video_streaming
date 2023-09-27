@@ -23,6 +23,7 @@ type VideoServiceClient interface {
 	FindArchivedVideoByUserId(ctx context.Context, in *FindArchivedVideoByUserIdRequest, opts ...grpc.CallOption) (*FindArchivedVideoByUserIdResponse, error)
 	FindUserVideo(ctx context.Context, in *FindUserVideoRequest, opts ...grpc.CallOption) (*FindUserVideoResponse, error)
 	ArchiveVideo(ctx context.Context, in *ArchiveVideoRequest, opts ...grpc.CallOption) (*ArchiveVideoResponse, error)
+	FetchAllVideo(ctx context.Context, in *FetchAllVideoRequest, opts ...grpc.CallOption) (*FetchAllVideoResponse, error)
 }
 
 type videoServiceClient struct {
@@ -103,6 +104,15 @@ func (c *videoServiceClient) ArchiveVideo(ctx context.Context, in *ArchiveVideoR
 	return out, nil
 }
 
+func (c *videoServiceClient) FetchAllVideo(ctx context.Context, in *FetchAllVideoRequest, opts ...grpc.CallOption) (*FetchAllVideoResponse, error) {
+	out := new(FetchAllVideoResponse)
+	err := c.cc.Invoke(ctx, "/pb.VideoService/FetchAllVideo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoServiceServer is the server API for VideoService service.
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility
@@ -112,6 +122,7 @@ type VideoServiceServer interface {
 	FindArchivedVideoByUserId(context.Context, *FindArchivedVideoByUserIdRequest) (*FindArchivedVideoByUserIdResponse, error)
 	FindUserVideo(context.Context, *FindUserVideoRequest) (*FindUserVideoResponse, error)
 	ArchiveVideo(context.Context, *ArchiveVideoRequest) (*ArchiveVideoResponse, error)
+	FetchAllVideo(context.Context, *FetchAllVideoRequest) (*FetchAllVideoResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -133,6 +144,9 @@ func (UnimplementedVideoServiceServer) FindUserVideo(context.Context, *FindUserV
 }
 func (UnimplementedVideoServiceServer) ArchiveVideo(context.Context, *ArchiveVideoRequest) (*ArchiveVideoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ArchiveVideo not implemented")
+}
+func (UnimplementedVideoServiceServer) FetchAllVideo(context.Context, *FetchAllVideoRequest) (*FetchAllVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchAllVideo not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 
@@ -245,6 +259,24 @@ func _VideoService_ArchiveVideo_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_FetchAllVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchAllVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).FetchAllVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.VideoService/FetchAllVideo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).FetchAllVideo(ctx, req.(*FetchAllVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoService_ServiceDesc is the grpc.ServiceDesc for VideoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -267,6 +299,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ArchiveVideo",
 			Handler:    _VideoService_ArchiveVideo_Handler,
+		},
+		{
+			MethodName: "FetchAllVideo",
+			Handler:    _VideoService_FetchAllVideo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

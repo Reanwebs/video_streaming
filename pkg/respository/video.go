@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"videoStreaming/pkg/domain"
 	"videoStreaming/pkg/respository/interfaces"
@@ -40,16 +39,17 @@ func (c *videoRepo) CreateVideoid(input domain.ToSaveVideo) (bool, error) {
 
 func (c *videoRepo) FetchUserVideos(userName string) ([]*domain.Video, error) {
 	var data []*domain.Video
-	if err := c.DB.Model(&domain.Video{}).
-		Where("user_name = ? AND archived = ?", userName, false).
+
+	if err := c.DB.
+		Where("user_name = ?", userName).
 		Find(&data).
 		Error; err != nil {
 		return nil, err
 	}
 
 	if len(data) == 0 {
-		fmt.Println("fetching empty array")
-		return []*domain.Video{}, errors.New("there is novideo")
+		fmt.Println("Fetching empty array")
+		return []*domain.Video{}, nil
 	}
 
 	return data, nil
@@ -66,7 +66,7 @@ func (c *videoRepo) FindArchivedVideos(userName string) ([]*domain.Video, error)
 
 	if len(data) == 0 {
 		fmt.Println("fetching empty array")
-		return []*domain.Video{}, errors.New("there is no video")
+		return []*domain.Video{}, nil
 	}
 
 	return data, nil
@@ -85,4 +85,21 @@ func (c *videoRepo) ArchivedVideos(VideoId uint) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (c *videoRepo) FetchAllVideos() ([]*domain.Video, error) {
+	var data []*domain.Video
+	if err := c.DB.Model(&domain.Video{}).
+		Where("archived = ?", false).
+		Find(&data).
+		Error; err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		fmt.Println("Fetching empty array")
+		return []*domain.Video{}, nil
+	}
+
+	return data, nil
 }
