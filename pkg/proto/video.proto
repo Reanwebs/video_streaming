@@ -12,6 +12,7 @@ service VideoService {
     rpc ArchiveVideo(ArchiveVideoRequest) returns (ArchiveVideoResponse) {}
     rpc FetchAllVideo(FetchAllVideoRequest) returns (FetchAllVideoResponse) {}
     rpc GetVideoById(GetVideoByIdRequest) returns (GetVideoByIdResponse) {}
+    rpc ToggleStar(ToggleStarRequest) returns (ToggleStarResponse) {}
 }
 
 message Request {
@@ -61,6 +62,8 @@ message FetchVideo {
     string title = 6;
     string S3Path = 7;
     bool archived = 8;
+    uint32 views = 9;
+    uint32 starred = 10;
 }
 
 message FindArchivedVideoByUserIdResponse {
@@ -85,6 +88,7 @@ message FetchAllVideoResponse {
 
 message GetVideoByIdRequest {
     uint32 videoId = 1;
+    string userName = 2;
 }
 message GetVideoByIdResponse {
     uint32 VideoId = 1;
@@ -94,7 +98,10 @@ message GetVideoByIdResponse {
     string thumbnailId = 5;
     string title = 6;
     string S3Path = 7;
-    bool archived = 8;
+    bool archived = 8; 
+    bool isStarred = 9; 
+    uint32 views = 10;
+    uint32 starred = 11; 
 }
 
 message ArchiveVideoRequest {
@@ -102,4 +109,13 @@ message ArchiveVideoRequest {
 }
 message ArchiveVideoResponse{
     bool status = 1;
+}
+
+message ToggleStarRequest {
+  uint32 videoId = 1;
+  string userNAme = 2;
+  bool starred = 3;
+}
+message ToggleStarResponse {
+   bool status = 1; 
 }
