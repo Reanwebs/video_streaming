@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type Video struct {
 	ID           uint `gorm:"primarykey"`
 	Archived     bool `gorm:"default:false"`
@@ -10,6 +12,8 @@ type Video struct {
 	Discription  string
 	Interest     string
 	Thumbnail_id string
+	Views        uint
+	Starred      uint
 }
 
 type ToSaveVideo struct {
@@ -20,4 +24,17 @@ type ToSaveVideo struct {
 	Discription string `json:"discription"`
 	Intrest     string `json:"interest"`
 	ThumbnailId string `json:"thumbnailId"`
+}
+
+type Star struct {
+	ID       uint `gorm:"primarykey"`
+	VideoID  uint
+	UserName string
+}
+
+type Viewer struct {
+	ID        uint `gorm:"primarykey"`
+	VideoID   uint
+	UserName  string
+	Timestamp time.Time
 }

@@ -105,6 +105,8 @@ func (c *VideoServer) FindUserVideo(ctx context.Context, input *pb.FindUserVideo
 			Title:       v.Title,
 			Intrest:     v.Interest,
 			Archived:    v.Archived,
+			Views:       uint32(v.Views),
+			Starred:     uint32(v.Starred),
 		}
 	}
 
@@ -131,6 +133,8 @@ func (c *VideoServer) FindArchivedVideoByUserId(ctx context.Context, input *pb.F
 			Title:       v.Title,
 			Intrest:     v.Interest,
 			Archived:    v.Archived,
+			Views:       uint32(v.Views),
+			Starred:     uint32(v.Starred),
 		}
 	}
 
@@ -157,6 +161,8 @@ func (c *VideoServer) FetchAllVideo(ctx context.Context, input *pb.FetchAllVideo
 			Title:       v.Title,
 			Intrest:     v.Interest,
 			Archived:    v.Archived,
+			Views:       uint32(v.Views),
+			Starred:     uint32(v.Starred),
 		}
 	}
 
@@ -182,7 +188,7 @@ func (c *VideoServer) ArchiveVideo(ctx context.Context, input *pb.ArchiveVideoRe
 
 func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRequest) (*pb.GetVideoByIdResponse, error) {
 
-	res, err := c.Repo.GetVideoById(uint(input.VideoId))
+	res, isStarred, err := c.Repo.GetVideoById(uint(input.VideoId), input.UserName)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +201,24 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 		ThumbnailId: res.Thumbnail_id,
 		Title:       res.Title,
 		S3Path:      res.S3_path,
+		IsStarred:   isStarred,
+		Views:       uint32(res.Views),
+		Starred:     uint32(res.Starred),
 	}
 	return response, err
 
+}
+
+func (c *VideoServer) ToggleStar(ctx context.Context, input *pb.ToggleStarRequest) (*pb.ToggleStarResponse, error) {
+
+	res, err := c.Repo.ToggleStar(uint(input.VideoId), input.UserNAme, input.Starred)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &pb.ToggleStarResponse{
+		Status: res,
+	}
+
+	return response, nil
 }

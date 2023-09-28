@@ -17,7 +17,11 @@ func Initdb(cfg *config.Config) (*gorm.DB, error) {
 	if dbErr != nil {
 		log.Fatalln(dbErr)
 	}
-	db.AutoMigrate(&domain.Video{})
+	db.AutoMigrate(
+		&domain.Video{},
+		&domain.Star{},
+		&domain.Viewer{},
+	)
 
 	return db, dbErr
 }
