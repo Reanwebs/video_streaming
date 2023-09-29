@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pkg/pb/monit";
+
+service MonitizationService {
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+    rpc VideoReward(VideoRewardRequest) returns (VideoRewardResponse) {}
+
+}
+
+message HealthCheckRequest {
+    string data = 1;
+  }
+  
+  message HealthCheckResponse {
+    string result = 1;
+  }
+  
+  message VideoRewardRequest{
+    string UserID    = 1;
+    int32 VideoID   = 2;
+    string Reason    = 3;
+    uint32  Views     = 4;
+    uint32  PaidCoins = 5;
+}
+
+message VideoRewardResponse{
+    string Result = 1;
+}
