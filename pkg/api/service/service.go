@@ -205,9 +205,9 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 		Views:       uint32(res.Views),
 		Starred:     uint32(res.Starred),
 	}
-	if res.Views > 0 {
+	if res.Views >= 100 {
 		reward := res.Views % 100
-		if reward >= 1 {
+		if reward == 0 {
 			c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
 				UserID:    res.User_name,
 				VideoID:   response.VideoId,
