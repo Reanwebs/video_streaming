@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net"
+	clientinterfaces "videoStreaming/pkg/client/clientInterfaces"
 	"videoStreaming/pkg/config"
 	"videoStreaming/pkg/pb"
 
@@ -10,12 +11,13 @@ import (
 )
 
 type Server struct {
-	gs   *grpc.Server
-	Lis  net.Listener
-	Port string
+	gs     *grpc.Server
+	Lis    net.Listener
+	Port   string
+	Client clientinterfaces.MonitClient
 }
 
-func NewgrpcServe(c *config.Config, service pb.VideoServiceServer) (*Server, error) {
+func NewgrpcServe(c *config.Config, service pb.VideoServiceServer, monitClient clientinterfaces.MonitClient) (*Server, error) {
 	grpcserver := grpc.NewServer()
 	pb.RegisterVideoServiceServer(grpcserver, service)
 	lis, err := net.Listen("tcp", c.Port)
@@ -23,9 +25,10 @@ func NewgrpcServe(c *config.Config, service pb.VideoServiceServer) (*Server, err
 		return nil, err
 	}
 	return &Server{
-		gs:   grpcserver,
-		Lis:  lis,
-		Port: c.Port,
+		gs:     grpcserver,
+		Lis:    lis,
+		Port:   c.Port,
+		Client: monitClient,
 	}, nil
 }
 

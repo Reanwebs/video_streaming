@@ -9,6 +9,7 @@ package di
 import (
 	"videoStreaming/pkg/api"
 	"videoStreaming/pkg/api/service"
+	"videoStreaming/pkg/client"
 	"videoStreaming/pkg/config"
 	"videoStreaming/pkg/db"
 	"videoStreaming/pkg/respository"
@@ -23,7 +24,11 @@ func InitializeServe(c *config.Config) (*api.Server, error) {
 	}
 	videoRepo := repository.NewVideoRepo(gormDB)
 	videoServiceServer := service.NewVideoServer(videoRepo)
-	server, err := api.NewgrpcServe(c, videoServiceServer)
+	monitClient, err := client.InitClient(c)
+	if err != nil {
+		return nil, err
+	}
+	server, err := api.NewgrpcServe(c, videoServiceServer, monitClient)
 	if err != nil {
 		return nil, err
 	}

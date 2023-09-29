@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	clientinterfaces "videoStreaming/pkg/client/clientInterfaces"
 	"videoStreaming/pkg/domain"
 	"videoStreaming/pkg/pb"
 	"videoStreaming/pkg/respository/interfaces"
@@ -14,10 +15,9 @@ import (
 	"github.com/google/uuid"
 )
 
-const storageLocation = "storage"
-
 type VideoServer struct {
 	Repo interfaces.VideoRepo
+	clientinterfaces.MonitClient
 	pb.VideoServiceServer
 }
 
@@ -204,6 +204,18 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 		IsStarred:   isStarred,
 		Views:       uint32(res.Views),
 		Starred:     uint32(res.Starred),
+	}
+	if res.Views > 0 {
+		reward := res.Views % 100
+		if reward >= 1 {
+			c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
+				UserID:    res.User_name,
+				VideoID:   response.VideoId,
+				Reason:    "views",
+				Views:     response.Views,
+				PaidCoins: 0,
+			})
+		}
 	}
 	return response, err
 

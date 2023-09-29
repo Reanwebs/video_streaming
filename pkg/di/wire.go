@@ -6,6 +6,7 @@ package di
 import (
 	api "videoStreaming/pkg/api"
 	"videoStreaming/pkg/api/service"
+	"videoStreaming/pkg/client"
 	"videoStreaming/pkg/config"
 	"videoStreaming/pkg/db"
 	repository "videoStreaming/pkg/respository"
@@ -14,10 +15,12 @@ import (
 )
 
 func InitializeServe(c *config.Config) (*api.Server, error) {
-	wire.Build(db.Initdb,
+	wire.Build(
+		db.Initdb,
 		repository.NewVideoRepo,
+		client.InitClient,
 		service.NewVideoServer,
-		api.NewGrpcServe,
+		api.NewgrpcServe,
 	)
 	return &api.Server{}, nil
 }
