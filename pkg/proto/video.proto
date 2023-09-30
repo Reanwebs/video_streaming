@@ -32,7 +32,8 @@ message UploadVideoRequest {
     string title = 5;
     string discription = 6;
     string filename = 7;
-    bytes data = 8;
+    string userId = 8;
+    bytes data = 9;
 }
 
 message UploadVideoResponse {
