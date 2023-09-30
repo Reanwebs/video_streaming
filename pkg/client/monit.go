@@ -13,7 +13,7 @@ import (
 )
 
 type monitClient struct {
-	Server monit.MonitizationServiceClient
+	Server monit.MonitizationClient
 }
 
 func InitClient(c *config.Config) (clientinterfaces.MonitClient, error) {
@@ -21,10 +21,10 @@ func InitClient(c *config.Config) (clientinterfaces.MonitClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewAuthClient(monit.NewMonitizationServiceClient(cc)), nil
+	return NewAuthClient(monit.NewMonitizationClient(cc)), nil
 }
 
-func NewAuthClient(server monit.MonitizationServiceClient) clientinterfaces.MonitClient {
+func NewAuthClient(server monit.MonitizationClient) clientinterfaces.MonitClient {
 	return &monitClient{
 		Server: server,
 	}
