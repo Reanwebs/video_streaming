@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package pb;
+package monitization;
 
 option go_package = "./pkg/pb/monit";
 
-service MonitizationService {
+service Monitization {
     rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
     rpc VideoReward(VideoRewardRequest) returns (VideoRewardResponse) {}
 
