@@ -32,6 +32,7 @@ func (c *videoRepo) CreateVideoid(input domain.ToSaveVideo) (bool, error) {
 		Views:        0,
 		Starred:      0,
 		Video_id:     input.Video_id,
+		UserId:       input.UserId,
 	}
 
 	if err := c.DB.Create(video).Error; err != nil {

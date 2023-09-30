@@ -66,6 +66,7 @@ func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) erro
 			Intrest:     uploadData.Intrest,
 			ThumbnailId: uploadData.ThumbnailId,
 			Video_id:    videoId,
+			UserId:      uploadData.UserId,
 		}
 
 		_, err = buffer.Write(uploadData.Data)

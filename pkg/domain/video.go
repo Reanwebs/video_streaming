@@ -15,6 +15,7 @@ type Video struct {
 	Thumbnail_id string
 	Views        uint
 	Starred      uint
+	UserId       string
 }
 
 type ToSaveVideo struct {
@@ -26,6 +27,7 @@ type ToSaveVideo struct {
 	Intrest     string `json:"interest"`
 	ThumbnailId string `json:"thumbnailId"`
 	Video_id    string
+	UserId      string
 }
 
 type Star struct {
