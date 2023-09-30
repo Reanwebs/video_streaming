@@ -216,7 +216,7 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 		if reward == 0 {
 			fmt.Print("client func started\n\n\n", res)
 			err := c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
-				UserID:    res.User_name,
+				UserID:    res.UserId,
 				VideoID:   response.VideoId,
 				Reason:    "views",
 				Views:     response.Views,
