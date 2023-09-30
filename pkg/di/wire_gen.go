@@ -23,11 +23,11 @@ func InitializeServe(c *config.Config) (*api.Server, error) {
 		return nil, err
 	}
 	videoRepo := repository.NewVideoRepo(gormDB)
-	videoServiceServer := service.NewVideoServer(videoRepo)
 	monitClient, err := client.InitClient(c)
 	if err != nil {
 		return nil, err
 	}
+	videoServiceServer := service.NewVideoServer(videoRepo, monitClient)
 	server, err := api.NewgrpcServe(c, videoServiceServer, monitClient)
 	if err != nil {
 		return nil, err

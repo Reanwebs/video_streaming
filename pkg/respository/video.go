@@ -117,7 +117,6 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 		return nil, false, err
 	}
 
-	// Check if the user has previously viewed this video
 	var star domain.Star
 	if err := c.DB.Where("video_id = ? AND user_name = ?", id, userName).First(&star).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -130,8 +129,10 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 	// Increment the view count
 	video.Views++
 	if err := c.DB.Save(&video).Error; err != nil {
+		fmt.Println("error in Increment the view count")
 		return nil, false, err
 	}
+	fmt.Println(" Increment the view count")
 
 	// Record the viewer's information
 	view := domain.Viewer{
