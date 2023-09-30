@@ -13,18 +13,19 @@ import (
 )
 
 type monitClient struct {
-	Server monit.MonitizationClient
+	Server monit.MonitizationServiceClient
 }
 
 func InitClient(c *config.Config) (clientinterfaces.MonitClient, error) {
 	cc, err := grpc.Dial(c.MONIT_SVC, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
+		fmt.Println("\n\nmonitClient calling failed ")
 		return nil, err
 	}
-	return NewAuthClient(monit.NewMonitizationClient(cc)), nil
+	return NewMonitClient(monit.NewMonitizationServiceClient(cc)), nil
 }
 
-func NewAuthClient(server monit.MonitizationClient) clientinterfaces.MonitClient {
+func NewMonitClient(server monit.MonitizationServiceClient) clientinterfaces.MonitClient {
 	return &monitClient{
 		Server: server,
 	}

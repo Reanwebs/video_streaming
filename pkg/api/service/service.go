@@ -17,14 +17,15 @@ import (
 )
 
 type VideoServer struct {
-	Repo interfaces.VideoRepo
-	clientinterfaces.MonitClient
+	Repo        interfaces.VideoRepo
+	MonitClient clientinterfaces.MonitClient
 	pb.VideoServiceServer
 }
 
-func NewVideoServer(repo interfaces.VideoRepo) pb.VideoServiceServer {
+func NewVideoServer(repo interfaces.VideoRepo, monitClient clientinterfaces.MonitClient) pb.VideoServiceServer {
 	return &VideoServer{
-		Repo: repo,
+		Repo:        repo,
+		MonitClient: monitClient,
 	}
 }
 
@@ -212,6 +213,7 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 	if res.Views >= 100 {
 		reward := res.Views % 100
 		if reward == 0 {
+			fmt.Print("client func started\n\n\n", res)
 			err := c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
 				UserID:    res.User_name,
 				VideoID:   response.VideoId,
