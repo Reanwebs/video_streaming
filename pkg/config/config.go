@@ -11,7 +11,7 @@ type Config struct {
 	Port                  string `mapstructure:"PORT"`
 	AWS_ACCESS_KEY_ID     string `mapstructure:"AWS_ACCESS_KEY_ID"`
 	AWS_SECRET_ACCESS_KEY string `mapstructure:"AWS_SECRET_ACCESS_KEY"`
-	Product_SVC           string `mapstructure:"PRODUCT_SVC"`
+	MONIT_SVC             string `mapstructure:"MONIT_SVC"`
 }
 
 var envs = []string{"DB_PORT", "DB_HOST",
