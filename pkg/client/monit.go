@@ -17,7 +17,7 @@ type monitClient struct {
 }
 
 func InitClient(c *config.Config) (clientinterfaces.MonitClient, error) {
-	cc, err := grpc.Dial(c.Product_SVC, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.Dial(c.MONIT_SVC, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
