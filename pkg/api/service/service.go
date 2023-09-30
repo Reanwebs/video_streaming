@@ -212,8 +212,6 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 	if res.Views >= 100 {
 		reward := res.Views % 100
 		if reward == 0 {
-			fmt.Println("\n\nVideoReward service")
-
 			err := c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
 				UserID:    res.User_name,
 				VideoID:   response.VideoId,
