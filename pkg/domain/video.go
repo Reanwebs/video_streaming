@@ -4,6 +4,7 @@ import "time"
 
 type Video struct {
 	ID           uint `gorm:"primarykey"`
+	Video_id     string
 	Archived     bool `gorm:"default:false"`
 	S3_path      string
 	User_name    string
@@ -24,17 +25,18 @@ type ToSaveVideo struct {
 	Discription string `json:"discription"`
 	Intrest     string `json:"interest"`
 	ThumbnailId string `json:"thumbnailId"`
+	Video_id    string
 }
 
 type Star struct {
 	ID       uint `gorm:"primarykey"`
-	VideoID  uint
+	VideoID  string
 	UserName string
 }
 
 type Viewer struct {
 	ID        uint `gorm:"primarykey"`
-	VideoID   uint
+	VideoID   string
 	UserName  string
 	Timestamp time.Time
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	clientinterfaces "videoStreaming/pkg/client/clientInterfaces"
@@ -54,6 +55,8 @@ func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) erro
 			return err
 		}
 
+		videoId := utils.GenerateUniqueString()
+
 		request = domain.ToSaveVideo{
 			UserName:    uploadData.UserName,
 			AvatarId:    uploadData.AvatarId,
@@ -61,6 +64,7 @@ func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) erro
 			Discription: uploadData.Discription,
 			Intrest:     uploadData.Intrest,
 			ThumbnailId: uploadData.ThumbnailId,
+			Video_id:    videoId,
 		}
 
 		_, err = buffer.Write(uploadData.Data)
@@ -97,7 +101,7 @@ func (c *VideoServer) FindUserVideo(ctx context.Context, input *pb.FindUserVideo
 	data := make([]*pb.FetchVideo, len(res))
 	for i, v := range res {
 		data[i] = &pb.FetchVideo{
-			VideoId:     uint32(v.ID),
+			VideoId:     v.Video_id,
 			AvatarId:    v.Avatar_id,
 			S3Path:      v.S3_path,
 			UserName:    v.User_name,
@@ -125,7 +129,7 @@ func (c *VideoServer) FindArchivedVideoByUserId(ctx context.Context, input *pb.F
 	data := make([]*pb.FetchVideo, len(res))
 	for i, v := range res {
 		data[i] = &pb.FetchVideo{
-			VideoId:     uint32(v.ID),
+			VideoId:     v.Video_id,
 			AvatarId:    v.Avatar_id,
 			S3Path:      v.S3_path,
 			UserName:    v.User_name,
@@ -153,7 +157,7 @@ func (c *VideoServer) FetchAllVideo(ctx context.Context, input *pb.FetchAllVideo
 	data := make([]*pb.FetchVideo, len(res))
 	for i, v := range res {
 		data[i] = &pb.FetchVideo{
-			VideoId:     uint32(v.ID),
+			VideoId:     v.Video_id,
 			AvatarId:    v.Avatar_id,
 			S3Path:      v.S3_path,
 			UserName:    v.User_name,
@@ -188,12 +192,12 @@ func (c *VideoServer) ArchiveVideo(ctx context.Context, input *pb.ArchiveVideoRe
 
 func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRequest) (*pb.GetVideoByIdResponse, error) {
 
-	res, isStarred, err := c.Repo.GetVideoById(uint(input.VideoId), input.UserName)
+	res, isStarred, err := c.Repo.GetVideoById(input.VideoId, input.UserName)
 	if err != nil {
 		return nil, err
 	}
 	response := &pb.GetVideoByIdResponse{
-		VideoId:     uint32(res.ID),
+		VideoId:     res.Video_id,
 		UserName:    res.User_name,
 		AvatarId:    res.Avatar_id,
 		Archived:    res.Archived,
@@ -208,13 +212,18 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 	if res.Views >= 100 {
 		reward := res.Views % 100
 		if reward == 0 {
-			c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
+			fmt.Println("\n\nVideoReward service")
+
+			err := c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
 				UserID:    res.User_name,
 				VideoID:   response.VideoId,
 				Reason:    "views",
 				Views:     response.Views,
 				PaidCoins: 0,
 			})
+			if err != nil {
+				fmt.Println(" failed to add reward")
+			}
 		}
 	}
 	return response, err
@@ -223,7 +232,7 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 
 func (c *VideoServer) ToggleStar(ctx context.Context, input *pb.ToggleStarRequest) (*pb.ToggleStarResponse, error) {
 
-	res, err := c.Repo.ToggleStar(uint(input.VideoId), input.UserNAme, input.Starred)
+	res, err := c.Repo.ToggleStar(input.VideoId, input.UserNAme, input.Starred)
 	if err != nil {
 		return nil, err
 	}

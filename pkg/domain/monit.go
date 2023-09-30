@@ -2,7 +2,7 @@ package domain
 
 type VideoRewardRequest struct {
 	UserID    string
-	VideoID   uint32
+	VideoID   string
 	Reason    string
 	Views     uint32
 	PaidCoins uint32

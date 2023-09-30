@@ -20,7 +20,7 @@ message HealthCheckRequest {
   
   message VideoRewardRequest{
     string UserID    = 1;
-    int32 VideoID   = 2;
+    string VideoID   = 2;
     string Reason    = 3;
     uint32  Views     = 4;
     uint32  PaidCoins = 5;

@@ -54,7 +54,7 @@ message FindArchivedVideoByUserIdRequest {
 }
 
 message FetchVideo {
-    uint32 VideoId = 1;
+    string VideoId = 1;
     string userName = 2;
     string avatarId = 3;
     string intrest = 4;
@@ -87,11 +87,11 @@ message FetchAllVideoResponse {
 }
 
 message GetVideoByIdRequest {
-    uint32 videoId = 1;
+    string videoId = 1;
     string userName = 2;
 }
 message GetVideoByIdResponse {
-    uint32 VideoId = 1;
+    string VideoId = 1;
     string userName = 2;
     string avatarId = 3;
     string intrest = 4;
@@ -112,7 +112,7 @@ message ArchiveVideoResponse{
 }
 
 message ToggleStarRequest {
-  uint32 videoId = 1;
+  string videoId = 1;
   string userNAme = 2;
   bool starred = 3;
 }
