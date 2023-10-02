@@ -49,7 +49,7 @@ func (c *videoRepo) FetchUserVideos(userName string) ([]*domain.Video, error) {
 	var data []*domain.Video
 
 	if err := c.DB.
-		Where("user_name = ?", userName).
+		Where("user_name = ? AND blocked = ?", userName, false).
 		Find(&data).
 		Error; err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (c *videoRepo) ArchivedVideos(VideoId uint) (bool, error) {
 func (c *videoRepo) FetchAllVideos() ([]*domain.Video, error) {
 	var data []*domain.Video
 	if err := c.DB.Model(&domain.Video{}).
-		Where("archived = ?", false).
+		Where("archived = ? AND blocked = ?", false, false).
 		Find(&data).
 		Error; err != nil {
 		return nil, err
