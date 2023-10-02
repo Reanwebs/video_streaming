@@ -14,6 +14,9 @@ service VideoService {
     rpc GetVideoById(GetVideoByIdRequest) returns (GetVideoByIdResponse) {}
     rpc ToggleStar(ToggleStarRequest) returns (ToggleStarResponse) {}
     rpc BlockVideo(BlockVideoRequest) returns (BlockVideoResponse) {}
+    rpc GetReportedVideos(GetReportedVideosRequest) returns (GetReportedVideosResponse) {}
+    rpc ReportVideo(ReportVideoRequest) returns (ReportVideoResponse) {}
+
 }
 
 message Request {
@@ -129,4 +132,39 @@ message BlockVideoRequest {
 }
 message BlockVideoResponse {
     bool blocked = 1;
+}
+
+
+message ReportedVideos {
+    string VideoId = 1;
+    string userName = 2;
+    string avatarId = 3;
+    string intrest = 4;
+    string thumbnailId = 5;
+    string title = 6;
+    string S3Path = 7;
+    bool archived = 8; 
+    uint32 views = 9;
+    uint32 starred = 10; 
+    bool blocked = 11;
+    bool Exclisive = 12;
+    uint32 coin = 13;
+    string reason = 14;
+}
+
+message GetReportedVideosRequest {
+
+}
+message GetReportedVideosResponse {
+    repeated ReportedVideos videos = 1;
+
+ 
+}
+
+message ReportVideoRequest {
+    string videoId = 1;
+    string reason = 2;
+}
+message ReportVideoResponse {
+    bool status = 1;
 }
