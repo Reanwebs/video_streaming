@@ -261,3 +261,34 @@ func (c *VideoServer) BlockVideo(ctx context.Context, input *pb.BlockVideoReques
 
 	return response, nil
 }
+
+func (c *VideoServer) GetReportedVideos(ctx context.Context, input *pb.GetReportedVideosRequest) (*pb.GetReportedVideosResponse, error) {
+	res, err := c.Repo.GetReportedVideos()
+	if err != nil {
+		return nil, err
+	}
+	data := make([]*pb.ReportedVideos, len(res))
+	for i, v := range res {
+		data[i] = &pb.ReportedVideos{
+			VideoId:     v.Video_id,
+			AvatarId:    v.Avatar_id,
+			S3Path:      v.S3_path,
+			UserName:    v.User_name,
+			ThumbnailId: v.Thumbnail_id,
+			Title:       v.Title,
+			Intrest:     v.Interest,
+			Archived:    v.Archived,
+			Views:       uint32(v.Views),
+			Starred:     uint32(v.Starred),
+			Exclisive:   v.Exclusive,
+			Coin:        uint32(v.Coin_for_watch),
+			Reason:      v.Reason,
+		}
+	}
+
+	response := &pb.GetReportedVideosResponse{
+		Videos: data,
+	}
+
+	return response, nil
+}

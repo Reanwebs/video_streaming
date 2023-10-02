@@ -13,4 +13,5 @@ type VideoRepo interface {
 	GetVideoById(string, string) (*domain.Video, bool, error)
 	ToggleStar(string, string, bool) (bool, error)
 	BlockVideo(domain.BlockedVideo) (bool, error)
+	GetReportedVideos() ([]domain.ReportedVideo, error)
 }

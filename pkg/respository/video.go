@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 	"videoStreaming/pkg/domain"
+	"videoStreaming/pkg/pb"
 	"videoStreaming/pkg/respository/interfaces"
 
 	"gorm.io/gorm"
@@ -251,4 +252,29 @@ func (c *videoRepo) BlockVideo(input domain.BlockedVideo) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (c *videoRepo) ReportVideo(input *pb.ReportVideoRequest) (bool, error) {
+	data := &domain.ReportVideo{
+		VideoId: input.VideoId,
+		Reason:  input.Reason,
+	}
+
+	if err := c.DB.Create(data).Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (c *videoRepo) GetReportedVideos() ([]domain.ReportedVideo, error) {
+	var reportedVideos []domain.ReportedVideo
+
+	if err := c.DB.Table("videos").
+		Joins("JOIN report_videos ON videos.Video_id = report_videos.VideoId").
+		Scan(&reportedVideos).Error; err != nil {
+		return nil, err
+	}
+
+	return reportedVideos, nil
 }

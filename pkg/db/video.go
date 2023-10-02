@@ -22,6 +22,7 @@ func Initdb(cfg *config.Config) (*gorm.DB, error) {
 		&domain.Star{},
 		&domain.Viewer{},
 		&domain.BlockedVideo{},
+		&domain.ReportVideo{},
 	)
 
 	return db, dbErr
