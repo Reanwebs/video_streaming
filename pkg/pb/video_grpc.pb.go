@@ -27,6 +27,7 @@ const (
 	VideoService_FetchAllVideo_FullMethodName             = "/pb.VideoService/FetchAllVideo"
 	VideoService_GetVideoById_FullMethodName              = "/pb.VideoService/GetVideoById"
 	VideoService_ToggleStar_FullMethodName                = "/pb.VideoService/ToggleStar"
+	VideoService_BlockVideo_FullMethodName                = "/pb.VideoService/BlockVideo"
 )
 
 // VideoServiceClient is the client API for VideoService service.
@@ -41,6 +42,7 @@ type VideoServiceClient interface {
 	FetchAllVideo(ctx context.Context, in *FetchAllVideoRequest, opts ...grpc.CallOption) (*FetchAllVideoResponse, error)
 	GetVideoById(ctx context.Context, in *GetVideoByIdRequest, opts ...grpc.CallOption) (*GetVideoByIdResponse, error)
 	ToggleStar(ctx context.Context, in *ToggleStarRequest, opts ...grpc.CallOption) (*ToggleStarResponse, error)
+	BlockVideo(ctx context.Context, in *BlockVideoRequest, opts ...grpc.CallOption) (*BlockVideoResponse, error)
 }
 
 type videoServiceClient struct {
@@ -148,6 +150,15 @@ func (c *videoServiceClient) ToggleStar(ctx context.Context, in *ToggleStarReque
 	return out, nil
 }
 
+func (c *videoServiceClient) BlockVideo(ctx context.Context, in *BlockVideoRequest, opts ...grpc.CallOption) (*BlockVideoResponse, error) {
+	out := new(BlockVideoResponse)
+	err := c.cc.Invoke(ctx, VideoService_BlockVideo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoServiceServer is the server API for VideoService service.
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility
@@ -160,6 +171,7 @@ type VideoServiceServer interface {
 	FetchAllVideo(context.Context, *FetchAllVideoRequest) (*FetchAllVideoResponse, error)
 	GetVideoById(context.Context, *GetVideoByIdRequest) (*GetVideoByIdResponse, error)
 	ToggleStar(context.Context, *ToggleStarRequest) (*ToggleStarResponse, error)
+	BlockVideo(context.Context, *BlockVideoRequest) (*BlockVideoResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -190,6 +202,9 @@ func (UnimplementedVideoServiceServer) GetVideoById(context.Context, *GetVideoBy
 }
 func (UnimplementedVideoServiceServer) ToggleStar(context.Context, *ToggleStarRequest) (*ToggleStarResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ToggleStar not implemented")
+}
+func (UnimplementedVideoServiceServer) BlockVideo(context.Context, *BlockVideoRequest) (*BlockVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BlockVideo not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 
@@ -356,6 +371,24 @@ func _VideoService_ToggleStar_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_BlockVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BlockVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).BlockVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_BlockVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).BlockVideo(ctx, req.(*BlockVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoService_ServiceDesc is the grpc.ServiceDesc for VideoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -390,6 +423,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ToggleStar",
 			Handler:    _VideoService_ToggleStar_Handler,
+		},
+		{
+			MethodName: "BlockVideo",
+			Handler:    _VideoService_BlockVideo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
