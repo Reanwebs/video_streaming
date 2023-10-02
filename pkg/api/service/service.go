@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 	clientinterfaces "videoStreaming/pkg/client/clientInterfaces"
 	"videoStreaming/pkg/domain"
 	"videoStreaming/pkg/pb"
@@ -214,7 +215,6 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 	if res.Views >= 100 {
 		reward := res.Views % 100
 		if reward == 0 {
-			fmt.Print("client func started\n\n\n", res)
 			err := c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
 				UserID:    res.UserId,
 				VideoID:   response.VideoId,
@@ -240,6 +240,23 @@ func (c *VideoServer) ToggleStar(ctx context.Context, input *pb.ToggleStarReques
 
 	response := &pb.ToggleStarResponse{
 		Status: res,
+	}
+
+	return response, nil
+}
+
+func (c *VideoServer) BlockVideo(ctx context.Context, input *pb.BlockVideoRequest) (*pb.BlockVideoResponse, error) {
+	res, err := c.Repo.BlockVideo(domain.BlockedVideo{
+		VideoID:   input.VideoId,
+		Reason:    input.Reason,
+		Timestamp: time.Now(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	response := &pb.BlockVideoResponse{
+		Blocked: res,
 	}
 
 	return response, nil

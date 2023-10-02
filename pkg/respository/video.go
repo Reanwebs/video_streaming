@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"time"
 	"videoStreaming/pkg/domain"
 	"videoStreaming/pkg/respository/interfaces"
@@ -144,7 +146,6 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 	if err := c.DB.Create(&view).Error; err != nil {
 		return nil, false, err
 	}
-	fmt.Print("\n\n\n\n..........................................")
 	return &video, true, nil
 }
 
@@ -200,6 +201,52 @@ func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, 
 	// Commit the transaction if everything succeeded
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (c *videoRepo) BlockVideo(input domain.BlockedVideo) (bool, error) {
+	tx := c.DB.Begin()
+	if tx.Error != nil {
+		return false, tx.Error
+	}
+
+	var video domain.Video
+	if err := tx.Where("video_id = ? AND blocked = true", input.VideoID).First(&video).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			tx.Rollback()
+			return false, err
+		}
+	} else {
+		log.Printf("Video with ID %s is already blocked\n", input.VideoID)
+		tx.Rollback()
+		return false, nil
+	}
+
+	if err := tx.Model(&domain.Video{}).Where("video_id = ?", input.VideoID).Update("blocked", false).Error; err != nil {
+		tx.Rollback()
+		return false, err
+	}
+
+	if err := tx.Where("video_id = ?", input.VideoID).Delete(&domain.BlockedVideo{}).Error; err != nil {
+		tx.Rollback()
+		return false, err
+	}
+
+	blockRecord := &domain.BlockedVideo{
+		VideoID:   input.VideoID,
+		Reason:    input.Reason,
+		Timestamp: time.Now(),
+	}
+
+	if err := tx.Create(blockRecord).Error; err != nil {
+		tx.Rollback()
+		return false, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
 		return false, err
 	}
 

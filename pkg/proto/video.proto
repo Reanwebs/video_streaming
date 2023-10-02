@@ -13,6 +13,7 @@ service VideoService {
     rpc FetchAllVideo(FetchAllVideoRequest) returns (FetchAllVideoResponse) {}
     rpc GetVideoById(GetVideoByIdRequest) returns (GetVideoByIdResponse) {}
     rpc ToggleStar(ToggleStarRequest) returns (ToggleStarResponse) {}
+    rpc BlockVideo(BlockVideoRequest) returns (BlockVideoResponse) {}
 }
 
 message Request {
@@ -119,4 +120,13 @@ message ToggleStarRequest {
 }
 message ToggleStarResponse {
    bool status = 1; 
+}
+
+message BlockVideoRequest {
+    string videoId = 1;
+    string Reason = 2;
+    bool block = 3;
+}
+message BlockVideoResponse {
+    bool blocked = 1;
 }
