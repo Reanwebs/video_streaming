@@ -107,16 +107,20 @@ func (c *VideoServer) FindUserVideo(ctx context.Context, input *pb.FindUserVideo
 	data := make([]*pb.FetchVideo, len(res))
 	for i, v := range res {
 		data[i] = &pb.FetchVideo{
-			VideoId:     v.Video_id,
-			AvatarId:    v.Avatar_id,
-			S3Path:      v.S3_path,
-			UserName:    v.User_name,
-			ThumbnailId: v.Thumbnail_id,
-			Title:       v.Title,
-			Intrest:     v.Interest,
-			Archived:    v.Archived,
-			Views:       uint32(v.Views),
-			Starred:     uint32(v.Starred),
+			VideoId:      v.Video_id,
+			AvatarId:     v.Avatar_id,
+			S3Path:       v.S3_path,
+			UserName:     v.User_name,
+			ThumbnailId:  v.Thumbnail_id,
+			Title:        v.Title,
+			Intrest:      v.Interest,
+			Archived:     v.Archived,
+			Views:        uint32(v.Views),
+			Starred:      uint32(v.Starred),
+			Exclusive:    v.Exclusive,
+			CoinForWatch: uint32(v.Coin_for_watch),
+			Discription:  v.Discription,
+			Blocked:      v.Blocked,
 		}
 	}
 
@@ -135,16 +139,20 @@ func (c *VideoServer) FindArchivedVideoByUserId(ctx context.Context, input *pb.F
 	data := make([]*pb.FetchVideo, len(res))
 	for i, v := range res {
 		data[i] = &pb.FetchVideo{
-			VideoId:     v.Video_id,
-			AvatarId:    v.Avatar_id,
-			S3Path:      v.S3_path,
-			UserName:    v.User_name,
-			ThumbnailId: v.Thumbnail_id,
-			Title:       v.Title,
-			Intrest:     v.Interest,
-			Archived:    v.Archived,
-			Views:       uint32(v.Views),
-			Starred:     uint32(v.Starred),
+			VideoId:      v.Video_id,
+			AvatarId:     v.Avatar_id,
+			S3Path:       v.S3_path,
+			UserName:     v.User_name,
+			ThumbnailId:  v.Thumbnail_id,
+			Title:        v.Title,
+			Intrest:      v.Interest,
+			Archived:     v.Archived,
+			Views:        uint32(v.Views),
+			Starred:      uint32(v.Starred),
+			Exclusive:    v.Exclusive,
+			CoinForWatch: uint32(v.Coin_for_watch),
+			Discription:  v.Discription,
+			Blocked:      v.Blocked,
 		}
 	}
 
@@ -163,16 +171,20 @@ func (c *VideoServer) FetchAllVideo(ctx context.Context, input *pb.FetchAllVideo
 	data := make([]*pb.FetchVideo, len(res))
 	for i, v := range res {
 		data[i] = &pb.FetchVideo{
-			VideoId:     v.Video_id,
-			AvatarId:    v.Avatar_id,
-			S3Path:      v.S3_path,
-			UserName:    v.User_name,
-			ThumbnailId: v.Thumbnail_id,
-			Title:       v.Title,
-			Intrest:     v.Interest,
-			Archived:    v.Archived,
-			Views:       uint32(v.Views),
-			Starred:     uint32(v.Starred),
+			VideoId:      v.Video_id,
+			AvatarId:     v.Avatar_id,
+			S3Path:       v.S3_path,
+			UserName:     v.User_name,
+			ThumbnailId:  v.Thumbnail_id,
+			Title:        v.Title,
+			Intrest:      v.Interest,
+			Archived:     v.Archived,
+			Views:        uint32(v.Views),
+			Starred:      uint32(v.Starred),
+			Exclusive:    v.Exclusive,
+			CoinForWatch: uint32(v.Coin_for_watch),
+			Discription:  v.Discription,
+			Blocked:      v.Blocked,
 		}
 	}
 
@@ -305,6 +317,7 @@ func (c *VideoServer) GetReportedVideos(ctx context.Context, input *pb.GetReport
 			Exclisive:   v.Exclusive,
 			Coin:        uint32(v.Coin_for_watch),
 			Reason:      v.Reason,
+			Blocked:     v.Blocked,
 		}
 	}
 
@@ -336,16 +349,19 @@ func (c *VideoServer) FetchExclusiveVideo(ctx context.Context, input *pb.FetchEx
 	data := make([]*pb.FetchVideo, len(res))
 	for i, v := range res {
 		data[i] = &pb.FetchVideo{
-			VideoId:     v.Video_id,
-			AvatarId:    v.Avatar_id,
-			S3Path:      v.S3_path,
-			UserName:    v.User_name,
-			ThumbnailId: v.Thumbnail_id,
-			Title:       v.Title,
-			Intrest:     v.Interest,
-			Archived:    v.Archived,
-			Views:       uint32(v.Views),
-			Starred:     uint32(v.Starred),
+			VideoId:      v.Video_id,
+			AvatarId:     v.Avatar_id,
+			S3Path:       v.S3_path,
+			UserName:     v.User_name,
+			ThumbnailId:  v.Thumbnail_id,
+			Title:        v.Title,
+			Intrest:      v.Interest,
+			Archived:     v.Archived,
+			Views:        uint32(v.Views),
+			Starred:      uint32(v.Starred),
+			Exclusive:    v.Exclusive,
+			Blocked:      v.Blocked,
+			CoinForWatch: uint32(v.Coin_for_watch),
 		}
 	}
 
