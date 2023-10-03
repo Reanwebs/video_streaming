@@ -280,3 +280,19 @@ func (c *videoRepo) GetReportedVideos() ([]domain.ReportedVideo, error) {
 
 	return reportedVideos, nil
 }
+
+func (c *videoRepo) FetchExclusiveVideos() ([]*domain.Video, error) {
+	var videos []*domain.Video
+	if err := c.DB.Where("exclusive = ?", true).
+		Order("coin_for_watch desc").
+		Find(&videos).Error; err != nil {
+		return nil, err
+	}
+
+	if len(videos) == 0 {
+		fmt.Println("Fetching empty array")
+		return []*domain.Video{}, nil
+	}
+
+	return videos, nil
+}

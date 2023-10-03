@@ -30,6 +30,7 @@ const (
 	VideoService_BlockVideo_FullMethodName                = "/pb.VideoService/BlockVideo"
 	VideoService_GetReportedVideos_FullMethodName         = "/pb.VideoService/GetReportedVideos"
 	VideoService_ReportVideo_FullMethodName               = "/pb.VideoService/ReportVideo"
+	VideoService_FetchExclusiveVideo_FullMethodName       = "/pb.VideoService/FetchExclusiveVideo"
 )
 
 // VideoServiceClient is the client API for VideoService service.
@@ -47,6 +48,7 @@ type VideoServiceClient interface {
 	BlockVideo(ctx context.Context, in *BlockVideoRequest, opts ...grpc.CallOption) (*BlockVideoResponse, error)
 	GetReportedVideos(ctx context.Context, in *GetReportedVideosRequest, opts ...grpc.CallOption) (*GetReportedVideosResponse, error)
 	ReportVideo(ctx context.Context, in *ReportVideoRequest, opts ...grpc.CallOption) (*ReportVideoResponse, error)
+	FetchExclusiveVideo(ctx context.Context, in *FetchExclusiveVideoRequest, opts ...grpc.CallOption) (*FetchExclusiveVideoResponse, error)
 }
 
 type videoServiceClient struct {
@@ -181,6 +183,15 @@ func (c *videoServiceClient) ReportVideo(ctx context.Context, in *ReportVideoReq
 	return out, nil
 }
 
+func (c *videoServiceClient) FetchExclusiveVideo(ctx context.Context, in *FetchExclusiveVideoRequest, opts ...grpc.CallOption) (*FetchExclusiveVideoResponse, error) {
+	out := new(FetchExclusiveVideoResponse)
+	err := c.cc.Invoke(ctx, VideoService_FetchExclusiveVideo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoServiceServer is the server API for VideoService service.
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility
@@ -196,6 +207,7 @@ type VideoServiceServer interface {
 	BlockVideo(context.Context, *BlockVideoRequest) (*BlockVideoResponse, error)
 	GetReportedVideos(context.Context, *GetReportedVideosRequest) (*GetReportedVideosResponse, error)
 	ReportVideo(context.Context, *ReportVideoRequest) (*ReportVideoResponse, error)
+	FetchExclusiveVideo(context.Context, *FetchExclusiveVideoRequest) (*FetchExclusiveVideoResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -235,6 +247,9 @@ func (UnimplementedVideoServiceServer) GetReportedVideos(context.Context, *GetRe
 }
 func (UnimplementedVideoServiceServer) ReportVideo(context.Context, *ReportVideoRequest) (*ReportVideoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportVideo not implemented")
+}
+func (UnimplementedVideoServiceServer) FetchExclusiveVideo(context.Context, *FetchExclusiveVideoRequest) (*FetchExclusiveVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchExclusiveVideo not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 
@@ -455,6 +470,24 @@ func _VideoService_ReportVideo_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_FetchExclusiveVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchExclusiveVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).FetchExclusiveVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_FetchExclusiveVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).FetchExclusiveVideo(ctx, req.(*FetchExclusiveVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoService_ServiceDesc is the grpc.ServiceDesc for VideoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -501,6 +534,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportVideo",
 			Handler:    _VideoService_ReportVideo_Handler,
+		},
+		{
+			MethodName: "FetchExclusiveVideo",
+			Handler:    _VideoService_FetchExclusiveVideo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

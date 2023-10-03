@@ -327,3 +327,32 @@ func (c *VideoServer) ReportVideo(ctx context.Context, input *pb.ReportVideoRequ
 
 	return response, nil
 }
+
+func (c *VideoServer) FetchExclusiveVideo(ctx context.Context, input *pb.FetchExclusiveVideoRequest) (*pb.FetchExclusiveVideoResponse, error) {
+	res, err := c.Repo.FetchExclusiveVideos()
+	if err != nil {
+		return nil, err
+	}
+	data := make([]*pb.FetchVideo, len(res))
+	for i, v := range res {
+		data[i] = &pb.FetchVideo{
+			VideoId:     v.Video_id,
+			AvatarId:    v.Avatar_id,
+			S3Path:      v.S3_path,
+			UserName:    v.User_name,
+			ThumbnailId: v.Thumbnail_id,
+			Title:       v.Title,
+			Intrest:     v.Interest,
+			Archived:    v.Archived,
+			Views:       uint32(v.Views),
+			Starred:     uint32(v.Starred),
+		}
+	}
+
+	response := &pb.FetchExclusiveVideoResponse{
+		Videos: data,
+	}
+
+	return response, nil
+
+}
