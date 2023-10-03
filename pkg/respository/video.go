@@ -25,17 +25,19 @@ func NewVideoRepo(db *gorm.DB) interfaces.VideoRepo {
 func (c *videoRepo) CreateVideoid(input domain.ToSaveVideo) (bool, error) {
 
 	video := &domain.Video{
-		S3_path:      input.S3Path,
-		User_name:    input.UserName,
-		Avatar_id:    input.AvatarId,
-		Title:        input.Title,
-		Discription:  input.Discription,
-		Interest:     input.Intrest,
-		Thumbnail_id: input.ThumbnailId,
-		Views:        0,
-		Starred:      0,
-		Video_id:     input.Video_id,
-		UserId:       input.UserId,
+		S3_path:        input.S3Path,
+		User_name:      input.UserName,
+		Avatar_id:      input.AvatarId,
+		Title:          input.Title,
+		Discription:    input.Discription,
+		Interest:       input.Intrest,
+		Thumbnail_id:   input.ThumbnailId,
+		Views:          0,
+		Starred:        0,
+		Video_id:       input.Video_id,
+		UserId:         input.UserId,
+		Exclusive:      input.Exclusive,
+		Coin_for_watch: input.Coin_for_watch,
 	}
 
 	if err := c.DB.Create(video).Error; err != nil {

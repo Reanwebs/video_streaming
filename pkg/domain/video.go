@@ -22,15 +22,17 @@ type Video struct {
 }
 
 type ToSaveVideo struct {
-	S3Path      string `json:"s3path"`
-	UserName    string `json:"userName"`
-	AvatarId    string `json:"avatarId"`
-	Title       string `json:"title"`
-	Discription string `json:"discription"`
-	Intrest     string `json:"interest"`
-	ThumbnailId string `json:"thumbnailId"`
-	Video_id    string
-	UserId      string
+	S3Path         string `json:"s3path"`
+	UserName       string `json:"userName"`
+	AvatarId       string `json:"avatarId"`
+	Title          string `json:"title"`
+	Discription    string `json:"discription"`
+	Intrest        string `json:"interest"`
+	ThumbnailId    string `json:"thumbnailId"`
+	Video_id       string
+	UserId         string
+	Exclusive      bool
+	Coin_for_watch uint `gorm:"default:0"`
 }
 
 type Star struct {
