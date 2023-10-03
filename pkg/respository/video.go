@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 	"videoStreaming/pkg/domain"
 	"videoStreaming/pkg/pb"
@@ -217,36 +216,40 @@ func (c *videoRepo) BlockVideo(input domain.BlockedVideo) (bool, error) {
 	}
 
 	var video domain.Video
-	if err := tx.Where("video_id = ? AND blocked = true", input.VideoID).First(&video).Error; err != nil {
+	if err := tx.Where("video_id = ?", input.VideoID).First(&video).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			tx.Rollback()
 			return false, err
 		}
 	} else {
-		log.Printf("Video with ID %s is already blocked\n", input.VideoID)
-		tx.Rollback()
-		return false, nil
-	}
-
-	if err := tx.Model(&domain.Video{}).Where("video_id = ?", input.VideoID).Update("blocked", false).Error; err != nil {
-		tx.Rollback()
-		return false, err
-	}
-
-	if err := tx.Where("video_id = ?", input.VideoID).Delete(&domain.BlockedVideo{}).Error; err != nil {
-		tx.Rollback()
-		return false, err
-	}
-
-	blockRecord := &domain.BlockedVideo{
-		VideoID:   input.VideoID,
-		Reason:    input.Reason,
-		Timestamp: time.Now(),
-	}
-
-	if err := tx.Create(blockRecord).Error; err != nil {
-		tx.Rollback()
-		return false, err
+		if !video.Blocked {
+			// Set the corresponding video's 'blocked' field to true
+			if err := tx.Model(&domain.Video{}).Where("video_id = ?", input.VideoID).Update("blocked", true).Error; err != nil {
+				tx.Rollback()
+				return false, err
+			}
+			// Create a record in the BlockedVideo table
+			blockRecord := &domain.BlockedVideo{
+				VideoID:   input.VideoID,
+				Reason:    input.Reason,
+				Timestamp: time.Now(),
+			}
+			if err := tx.Create(blockRecord).Error; err != nil {
+				tx.Rollback()
+				return false, err
+			}
+		} else {
+			// Set the corresponding video's 'blocked' field to false
+			if err := tx.Model(&domain.Video{}).Where("video_id = ?", input.VideoID).Update("blocked", false).Error; err != nil {
+				tx.Rollback()
+				return false, err
+			}
+			// Delete corresponding data from the BlockedVideo table
+			if err := tx.Where("video_id = ?", input.VideoID).Delete(&domain.BlockedVideo{}).Error; err != nil {
+				tx.Rollback()
+				return false, err
+			}
+		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
@@ -273,7 +276,7 @@ func (c *videoRepo) GetReportedVideos() ([]domain.ReportedVideo, error) {
 	var reportedVideos []domain.ReportedVideo
 
 	if err := c.DB.Table("videos").
-		Joins("JOIN report_videos ON videos.Video_id = report_videos.VideoId").
+		Joins("JOIN report_videos ON videos.Video_id = report_videos.Video_id").
 		Scan(&reportedVideos).Error; err != nil {
 		return nil, err
 	}
