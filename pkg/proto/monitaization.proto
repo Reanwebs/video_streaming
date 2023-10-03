@@ -5,7 +5,7 @@ package monitization;
 option go_package = "./pkg/pb/monit";
 
 service Monitization {
-    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse){}
     rpc VideoReward(VideoRewardRequest) returns (VideoRewardResponse) {}
 
 }

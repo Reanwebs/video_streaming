@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 	clientinterfaces "videoStreaming/pkg/client/clientInterfaces"
@@ -60,14 +61,16 @@ func (c *VideoServer) UploadVideo(stream pb.VideoService_UploadVideoServer) erro
 		videoId := utils.GenerateUniqueString()
 
 		request = domain.ToSaveVideo{
-			UserName:    uploadData.UserName,
-			AvatarId:    uploadData.AvatarId,
-			Title:       uploadData.Title,
-			Discription: uploadData.Discription,
-			Intrest:     uploadData.Intrest,
-			ThumbnailId: uploadData.ThumbnailId,
-			Video_id:    videoId,
-			UserId:      uploadData.UserId,
+			UserName:       uploadData.UserName,
+			AvatarId:       uploadData.AvatarId,
+			Title:          uploadData.Title,
+			Discription:    uploadData.Discription,
+			Intrest:        uploadData.Intrest,
+			ThumbnailId:    uploadData.ThumbnailId,
+			Video_id:       videoId,
+			UserId:         uploadData.UserId,
+			Exclusive:      uploadData.Exclusive,
+			Coin_for_watch: uint(uploadData.CoinForWatch),
 		}
 
 		_, err = buffer.Write(uploadData.Data)
@@ -199,18 +202,37 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 	if err != nil {
 		return nil, err
 	}
+
+	if res.Exclusive {
+		err := c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
+			UserID:    input.UserId,
+			VideoID:   res.Video_id,
+			Reason:    "paid",
+			Views:     uint32(res.Views),
+			PaidCoins: uint32(res.Coin_for_watch),
+		})
+		if err != nil {
+			log.Println(" failed to add reward")
+			return nil, errors.New("insuffient coins to watch exclusive content")
+		}
+	}
+
 	response := &pb.GetVideoByIdResponse{
-		VideoId:     res.Video_id,
-		UserName:    res.User_name,
-		AvatarId:    res.Avatar_id,
-		Archived:    res.Archived,
-		Intrest:     res.Interest,
-		ThumbnailId: res.Thumbnail_id,
-		Title:       res.Title,
-		S3Path:      res.S3_path,
-		IsStarred:   isStarred,
-		Views:       uint32(res.Views),
-		Starred:     uint32(res.Starred),
+		VideoId:      res.Video_id,
+		UserName:     res.User_name,
+		AvatarId:     res.Avatar_id,
+		Archived:     res.Archived,
+		Intrest:      res.Interest,
+		ThumbnailId:  res.Thumbnail_id,
+		Title:        res.Title,
+		S3Path:       res.S3_path,
+		IsStarred:    isStarred,
+		Views:        uint32(res.Views),
+		Starred:      uint32(res.Starred),
+		Discription:  res.Discription,
+		Exclusive:    res.Exclusive,
+		CoinForWatch: uint32(res.Coin_for_watch),
+		Blocked:      res.Blocked,
 	}
 	if res.Views >= 100 {
 		reward := res.Views % 100

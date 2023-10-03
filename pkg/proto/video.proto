@@ -28,7 +28,7 @@ message Request {
   }
   
 
-message UploadVideoRequest {
+  message UploadVideoRequest {
     string userName = 1;
     string avatarId = 2;
     string intrest = 3;
@@ -37,9 +37,10 @@ message UploadVideoRequest {
     string discription = 6;
     string filename = 7;
     string userId = 8;
-    bytes data = 9;
+    bool exclusive = 9;
+    uint32 coin_for_watch = 10;
+    bytes data = 11;
 }
-
 message UploadVideoResponse {
     int32 status = 1;
     string message = 2;
@@ -69,6 +70,10 @@ message FetchVideo {
     bool archived = 8;
     uint32 views = 9;
     uint32 starred = 10;
+    string discription = 11;
+    bool exclusive = 12;
+    uint32 coin_for_watch = 13;
+    bool blocked = 14;
 }
 
 message FindArchivedVideoByUserIdResponse {
@@ -94,6 +99,7 @@ message FetchAllVideoResponse {
 message GetVideoByIdRequest {
     string videoId = 1;
     string userName = 2;
+    string userId = 3;
 }
 message GetVideoByIdResponse {
     string VideoId = 1;
@@ -106,7 +112,11 @@ message GetVideoByIdResponse {
     bool archived = 8; 
     bool isStarred = 9; 
     uint32 views = 10;
-    uint32 starred = 11; 
+    string discription = 11;
+    bool exclusive = 12;
+    uint32 coin_for_watch = 13;
+    bool blocked = 14;
+    uint32 starred = 15; 
 }
 
 message ArchiveVideoRequest {
@@ -150,6 +160,9 @@ message ReportedVideos {
     bool Exclisive = 12;
     uint32 coin = 13;
     string reason = 14;
+    string discription = 15;
+    bool exclusive = 16;
+    uint32 coin_for_watch = 17;
 }
 
 message GetReportedVideosRequest {
