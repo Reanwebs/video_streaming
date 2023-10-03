@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"videoStreaming/pkg/domain"
+	"videoStreaming/pkg/pb"
 )
 
 type VideoRepo interface {
@@ -14,4 +15,5 @@ type VideoRepo interface {
 	ToggleStar(string, string, bool) (bool, error)
 	BlockVideo(domain.BlockedVideo) (bool, error)
 	GetReportedVideos() ([]domain.ReportedVideo, error)
+	ReportVideo(input *pb.ReportVideoRequest) (bool, error)
 }
