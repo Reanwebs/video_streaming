@@ -277,6 +277,7 @@ func (c *videoRepo) GetReportedVideos() ([]domain.ReportedVideo, error) {
 
 	if err := c.DB.Table("videos").
 		Joins("JOIN report_videos ON videos.Video_id = report_videos.Video_id").
+
 		Scan(&reportedVideos).Error; err != nil {
 		return nil, err
 	}
