@@ -292,3 +292,16 @@ func (c *VideoServer) GetReportedVideos(ctx context.Context, input *pb.GetReport
 
 	return response, nil
 }
+
+func (c *VideoServer) ReportVideo(ctx context.Context, input *pb.ReportVideoRequest) (*pb.ReportVideoResponse, error) {
+	res, err := c.Repo.ReportVideo(input)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &pb.ReportVideoResponse{
+		Status: res,
+	}
+
+	return response, nil
+}
