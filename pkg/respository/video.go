@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 	"videoStreaming/pkg/domain"
 	"videoStreaming/pkg/pb"
@@ -48,7 +49,6 @@ func (c *videoRepo) CreateVideoid(input domain.ToSaveVideo) (bool, error) {
 
 func (c *videoRepo) FetchUserVideos(userName string) ([]*domain.Video, error) {
 	var data []*domain.Video
-	fmt.Println("aaaaaaaaaaa")
 	if err := c.DB.
 		Where("user_name = ? AND blocked = ?", userName, false).
 		Find(&data).
@@ -157,34 +157,43 @@ func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, 
 		}
 	}()
 
-	if starred {
-		star := domain.Star{
-			VideoID:  id,
-			UserName: userName,
-		}
-		if err := tx.Create(&star).Error; err != nil {
-			tx.Rollback()
-			return false, err
-		}
-	} else {
-		if err := tx.Where("video_id = ? AND user_name = ?", id, userName).Delete(&domain.Star{}).Error; err != nil {
-			tx.Rollback()
-			return false, err
-		}
-	}
-
 	var video domain.Video
 	if err := tx.Where("video_id = ?", id).First(&video).Error; err != nil {
 		tx.Rollback()
 		return false, err
 	}
 
-	if starred {
+	var star domain.Star
+	err := c.DB.Where("video_id = ? AND user_name = ?", id, userName).First(&star).Error
+	if err != nil && !strings.Contains(err.Error(), "record not found") {
+		tx.Rollback()
+		return false, err
+	}
+
+	if starred && err == nil {
+	} else if starred && err != nil {
+		// Video is not starred, so star it
+		newStar := domain.Star{
+			VideoID:  id,
+			UserName: userName,
+		}
+		if err := tx.Create(&newStar).Error; err != nil {
+			tx.Rollback()
+			return false, err
+		}
 		video.Starred++
-	} else {
+	} else if !starred && err == nil {
+		if err := tx.Delete(&star).Error; err != nil {
+			tx.Rollback()
+			return false, err
+		}
 		if video.Starred > 0 {
 			video.Starred--
 		}
+	} else {
+		// This case should not occur
+		tx.Rollback()
+		return false, errors.ErrUnsupported
 	}
 
 	if err := tx.Save(&video).Error; err != nil {
