@@ -216,11 +216,11 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 	}
 
 	if res.Exclusive {
-		err := c.MonitClient.VideoReward(ctx, domain.VideoRewardRequest{
+		err := c.MonitClient.ExclusiveContent(ctx, domain.ExclusiveContentRequest{
 			UserID:    input.UserId,
 			VideoID:   res.Video_id,
 			Reason:    "paid",
-			Views:     uint32(res.Views),
+			Owner:     res.UserId,
 			PaidCoins: uint32(res.Coin_for_watch),
 		})
 		if err != nil {

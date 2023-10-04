@@ -8,4 +8,5 @@ import (
 type MonitClient interface {
 	HealthCheck(context.Context) (string, error)
 	VideoReward(context.Context, domain.VideoRewardRequest) error
+	ExclusiveContent(context.Context, domain.ExclusiveContentRequest) error
 }

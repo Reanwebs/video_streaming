@@ -49,3 +49,17 @@ func (m *monitClient) VideoReward(ctx context.Context, request domain.VideoRewar
 	}
 	return nil
 }
+
+func (m *monitClient) ExclusiveContent(ctx context.Context, request domain.ExclusiveContentRequest) error {
+	_, err := m.Server.ExclusiveContent(ctx, &monit.ExclusiveContentRequest{
+		UserID:    request.UserID,
+		VideoID:   request.VideoID,
+		Reason:    "paid",
+		Owner:     request.Owner,
+		PaidCoins: request.PaidCoins,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}

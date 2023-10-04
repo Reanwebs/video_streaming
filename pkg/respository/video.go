@@ -98,7 +98,7 @@ func (c *videoRepo) ArchivedVideos(VideoId uint) (bool, error) {
 func (c *videoRepo) FetchAllVideos() ([]*domain.Video, error) {
 	var data []*domain.Video
 	if err := c.DB.Model(&domain.Video{}).
-		Where("archived = ? AND blocked = ?", false, false).
+		Where("archived = ? AND blocked = ? AND exclusive = ?", false, false, false).
 		Find(&data).
 		Error; err != nil {
 		return nil, err
@@ -113,8 +113,8 @@ func (c *videoRepo) FetchAllVideos() ([]*domain.Video, error) {
 }
 
 func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, bool, error) {
-	// Find the video by its VideoId
 	var video domain.Video
+	var isStarred bool
 	if err := c.DB.Where("video_id = ?", id).First(&video).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, false, fmt.Errorf("Video with ID %s not found", id)
@@ -123,23 +123,18 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 	}
 
 	var star domain.Star
-	if err := c.DB.Where("video_id = ? AND user_name = ?", id, userName).First(&star).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			// User has not starred this video
-			return &video, false, nil
-		}
-		return nil, false, err
+	err := c.DB.Where("video_id = ? AND user_name = ?", id, userName).First(&star).Error
+	if err != nil {
+		isStarred = false
 	}
+	isStarred = true
 
-	// Increment the view count
 	video.Views++
 	if err := c.DB.Save(&video).Error; err != nil {
 		fmt.Println("error in Increment the view count")
 		return nil, false, err
 	}
-	fmt.Println(" Increment the view count")
 
-	// Record the viewer's information
 	view := domain.Viewer{
 		VideoID:   id,
 		UserName:  userName,
@@ -148,7 +143,7 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 	if err := c.DB.Create(&view).Error; err != nil {
 		return nil, false, err
 	}
-	return &video, true, nil
+	return &video, isStarred, nil
 }
 
 func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, error) {
@@ -235,6 +230,10 @@ func (c *videoRepo) BlockVideo(input domain.BlockedVideo) (bool, error) {
 				Timestamp: time.Now(),
 			}
 			if err := tx.Create(blockRecord).Error; err != nil {
+				tx.Rollback()
+				return false, err
+			}
+			if err := tx.Where("video_id = ?", input.VideoID).Delete(&domain.ReportVideo{}).Error; err != nil {
 				tx.Rollback()
 				return false, err
 			}

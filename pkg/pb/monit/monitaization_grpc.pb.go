@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Monitization_HealthCheck_FullMethodName = "/monitization.Monitization/HealthCheck"
-	Monitization_VideoReward_FullMethodName = "/monitization.Monitization/VideoReward"
+	Monitization_HealthCheck_FullMethodName      = "/monitization.Monitization/HealthCheck"
+	Monitization_VideoReward_FullMethodName      = "/monitization.Monitization/VideoReward"
+	Monitization_ExclusiveContent_FullMethodName = "/monitization.Monitization/ExclusiveContent"
 )
 
 // MonitizationClient is the client API for Monitization service.
@@ -29,6 +30,7 @@ const (
 type MonitizationClient interface {
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 	VideoReward(ctx context.Context, in *VideoRewardRequest, opts ...grpc.CallOption) (*VideoRewardResponse, error)
+	ExclusiveContent(ctx context.Context, in *ExclusiveContentRequest, opts ...grpc.CallOption) (*ExclusiveContentResponse, error)
 }
 
 type monitizationClient struct {
@@ -57,12 +59,22 @@ func (c *monitizationClient) VideoReward(ctx context.Context, in *VideoRewardReq
 	return out, nil
 }
 
+func (c *monitizationClient) ExclusiveContent(ctx context.Context, in *ExclusiveContentRequest, opts ...grpc.CallOption) (*ExclusiveContentResponse, error) {
+	out := new(ExclusiveContentResponse)
+	err := c.cc.Invoke(ctx, Monitization_ExclusiveContent_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MonitizationServer is the server API for Monitization service.
 // All implementations must embed UnimplementedMonitizationServer
 // for forward compatibility
 type MonitizationServer interface {
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	VideoReward(context.Context, *VideoRewardRequest) (*VideoRewardResponse, error)
+	ExclusiveContent(context.Context, *ExclusiveContentRequest) (*ExclusiveContentResponse, error)
 	mustEmbedUnimplementedMonitizationServer()
 }
 
@@ -75,6 +87,9 @@ func (UnimplementedMonitizationServer) HealthCheck(context.Context, *HealthCheck
 }
 func (UnimplementedMonitizationServer) VideoReward(context.Context, *VideoRewardRequest) (*VideoRewardResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VideoReward not implemented")
+}
+func (UnimplementedMonitizationServer) ExclusiveContent(context.Context, *ExclusiveContentRequest) (*ExclusiveContentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExclusiveContent not implemented")
 }
 func (UnimplementedMonitizationServer) mustEmbedUnimplementedMonitizationServer() {}
 
@@ -125,6 +140,24 @@ func _Monitization_VideoReward_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Monitization_ExclusiveContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExclusiveContentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MonitizationServer).ExclusiveContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Monitization_ExclusiveContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MonitizationServer).ExclusiveContent(ctx, req.(*ExclusiveContentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Monitization_ServiceDesc is the grpc.ServiceDesc for Monitization service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +172,10 @@ var Monitization_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VideoReward",
 			Handler:    _Monitization_VideoReward_Handler,
+		},
+		{
+			MethodName: "ExclusiveContent",
+			Handler:    _Monitization_ExclusiveContent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
