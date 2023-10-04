@@ -7,7 +7,7 @@ option go_package = "./pkg/pb/monit";
 service Monitization {
     rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse){}
     rpc VideoReward(VideoRewardRequest) returns (VideoRewardResponse) {}
-
+    rpc ExclusiveContent(ExclusiveContentRequest) returns (ExclusiveContentResponse) {}
 }
 
 message HealthCheckRequest {
@@ -28,4 +28,16 @@ message HealthCheckRequest {
 
 message VideoRewardResponse{
     string Result = 1;
+}
+
+message ExclusiveContentRequest{
+  string UserID    = 1;
+  string VideoID   = 2;
+  string Reason    = 3;
+  string  owner     = 4;
+  uint32  PaidCoins = 5;
+}
+
+message ExclusiveContentResponse {
+  string Result = 1;
 }
