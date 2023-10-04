@@ -134,6 +134,7 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 		fmt.Println("error in Increment the view count")
 		return nil, false, err
 	}
+	fmt.Println(" Increment the view count")
 
 	view := domain.Viewer{
 		VideoID:   id,
@@ -147,7 +148,6 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 }
 
 func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, error) {
-	// Start a transaction to ensure data consistency
 	tx := c.DB.Begin()
 	if tx.Error != nil {
 		return false, tx.Error
@@ -158,8 +158,14 @@ func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, 
 		}
 	}()
 
-	// Create or delete a star record
-	if starred {
+	var star domain.Star
+	isStarred := starred
+	err := c.DB.Where("video_id = ? AND user_name = ?", id, userName).First(&star).Error
+	if err != nil {
+		isStarred = false
+	}
+
+	if starred && !isStarred {
 		star := domain.Star{
 			VideoID:  id,
 			UserName: userName,
@@ -175,14 +181,13 @@ func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, 
 		}
 	}
 
-	// Update the video's Starred field
 	var video domain.Video
 	if err := tx.Where("video_id = ?", id).First(&video).Error; err != nil {
 		tx.Rollback()
 		return false, err
 	}
 
-	if starred {
+	if !isStarred {
 		video.Starred++
 	} else {
 		if video.Starred > 0 {
@@ -276,7 +281,6 @@ func (c *videoRepo) GetReportedVideos() ([]domain.ReportedVideo, error) {
 
 	if err := c.DB.Table("videos").
 		Joins("JOIN report_videos ON videos.Video_id = report_videos.Video_id").
-
 		Scan(&reportedVideos).Error; err != nil {
 		return nil, err
 	}
