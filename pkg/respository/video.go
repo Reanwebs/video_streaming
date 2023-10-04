@@ -48,7 +48,7 @@ func (c *videoRepo) CreateVideoid(input domain.ToSaveVideo) (bool, error) {
 
 func (c *videoRepo) FetchUserVideos(userName string) ([]*domain.Video, error) {
 	var data []*domain.Video
-
+	fmt.Println("aaaaaaaaaaa")
 	if err := c.DB.
 		Where("user_name = ? AND blocked = ?", userName, false).
 		Find(&data).
@@ -103,7 +103,7 @@ func (c *videoRepo) FetchAllVideos() ([]*domain.Video, error) {
 		Error; err != nil {
 		return nil, err
 	}
-
+	fmt.Println("\nall")
 	if len(data) == 0 {
 		fmt.Println("Fetching empty array")
 		return []*domain.Video{}, nil
@@ -114,7 +114,7 @@ func (c *videoRepo) FetchAllVideos() ([]*domain.Video, error) {
 
 func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, bool, error) {
 	var video domain.Video
-	var isStarred bool
+	isStarred := true
 	if err := c.DB.Where("video_id = ?", id).First(&video).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, false, fmt.Errorf("Video with ID %s not found", id)
@@ -124,10 +124,9 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 
 	var star domain.Star
 	err := c.DB.Where("video_id = ? AND user_name = ?", id, userName).First(&star).Error
-	if err != nil {
+	if err == gorm.ErrRecordNotFound || err != nil {
 		isStarred = false
 	}
-	isStarred = true
 
 	video.Views++
 	if err := c.DB.Save(&video).Error; err != nil {
@@ -158,14 +157,7 @@ func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, 
 		}
 	}()
 
-	var star domain.Star
-	isStarred := starred
-	err := c.DB.Where("video_id = ? AND user_name = ?", id, userName).First(&star).Error
-	if err != nil {
-		isStarred = false
-	}
-
-	if starred && !isStarred {
+	if starred {
 		star := domain.Star{
 			VideoID:  id,
 			UserName: userName,
@@ -187,7 +179,7 @@ func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, 
 		return false, err
 	}
 
-	if !isStarred {
+	if starred {
 		video.Starred++
 	} else {
 		if video.Starred > 0 {
@@ -200,7 +192,6 @@ func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, 
 		return false, err
 	}
 
-	// Commit the transaction if everything succeeded
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
 		return false, err
@@ -223,12 +214,10 @@ func (c *videoRepo) BlockVideo(input domain.BlockedVideo) (bool, error) {
 		}
 	} else {
 		if !video.Blocked {
-			// Set the corresponding video's 'blocked' field to true
 			if err := tx.Model(&domain.Video{}).Where("video_id = ?", input.VideoID).Update("blocked", true).Error; err != nil {
 				tx.Rollback()
 				return false, err
 			}
-			// Create a record in the BlockedVideo table
 			blockRecord := &domain.BlockedVideo{
 				VideoID:   input.VideoID,
 				Reason:    input.Reason,
@@ -243,12 +232,10 @@ func (c *videoRepo) BlockVideo(input domain.BlockedVideo) (bool, error) {
 				return false, err
 			}
 		} else {
-			// Set the corresponding video's 'blocked' field to false
 			if err := tx.Model(&domain.Video{}).Where("video_id = ?", input.VideoID).Update("blocked", false).Error; err != nil {
 				tx.Rollback()
 				return false, err
 			}
-			// Delete corresponding data from the BlockedVideo table
 			if err := tx.Where("video_id = ?", input.VideoID).Delete(&domain.BlockedVideo{}).Error; err != nil {
 				tx.Rollback()
 				return false, err
