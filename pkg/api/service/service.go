@@ -218,7 +218,7 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 	for i, v := range sug {
 		suggestions[i] = &pb.Suggestion{
 			VideoId:      v.Video_id,
-			UserName:     v.UserId,
+			UserName:     v.User_name,
 			AvatarId:     v.Avatar_id,
 			Intrest:      v.Interest,
 			ThumbnailId:  v.Thumbnail_id,
