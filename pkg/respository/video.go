@@ -312,3 +312,14 @@ func (c *videoRepo) FetchExclusiveVideos() ([]*domain.Video, error) {
 
 	return videos, nil
 }
+
+func (c *videoRepo) VideoDetails(id string) (*domain.Video, error) {
+	var video domain.Video
+	if err := c.DB.Where("video_id = ?", id).First(&video).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("Video with ID %s not found", id)
+		}
+		return nil, err
+	}
+	return &video, nil
+}

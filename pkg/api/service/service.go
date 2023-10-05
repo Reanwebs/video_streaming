@@ -378,3 +378,18 @@ func (c *VideoServer) FetchExclusiveVideo(ctx context.Context, input *pb.FetchEx
 	return response, nil
 
 }
+
+func (c *VideoServer) VideoDetails(ctx context.Context, input *pb.VideoDetailsRequest) (*pb.VideoDetailsResponse, error) {
+	res, err := c.Repo.VideoDetails(input.VideoID)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &pb.VideoDetailsResponse{
+		OwnerID: res.UserId,
+		Coins:   int32(res.Coin_for_watch),
+		Title:   res.Title,
+	}
+
+	return response, nil
+}
