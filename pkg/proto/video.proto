@@ -116,6 +116,7 @@ message GetVideoByIdResponse {
     uint32 coin_for_watch = 13;
     bool blocked = 14;
     uint32 starred = 15; 
+    repeated Suggestion Suggestions = 16;
 }
 
 message ArchiveVideoRequest {
@@ -185,4 +186,21 @@ message FetchExclusiveVideoRequest {}
 
 message FetchExclusiveVideoResponse {
     repeated FetchVideo videos = 1;
+}
+
+message Suggestion {
+    string VideoId = 1;
+    string userName = 2;
+    string avatarId = 3;
+    string intrest = 4;
+    string thumbnailId = 5;
+    string title = 6;
+    string S3Path = 7;
+    bool archived = 8;
+    uint32 views = 9;
+    uint32 starred = 10;
+    string discription = 11;
+    bool exclusive = 12;
+    uint32 coin_for_watch = 13;
+    bool blocked = 14;
 }
