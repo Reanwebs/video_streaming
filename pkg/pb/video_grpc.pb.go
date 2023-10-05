@@ -31,6 +31,7 @@ const (
 	VideoService_GetReportedVideos_FullMethodName         = "/pb.VideoService/GetReportedVideos"
 	VideoService_ReportVideo_FullMethodName               = "/pb.VideoService/ReportVideo"
 	VideoService_FetchExclusiveVideo_FullMethodName       = "/pb.VideoService/FetchExclusiveVideo"
+	VideoService_VideoDetails_FullMethodName              = "/pb.VideoService/VideoDetails"
 )
 
 // VideoServiceClient is the client API for VideoService service.
@@ -49,6 +50,7 @@ type VideoServiceClient interface {
 	GetReportedVideos(ctx context.Context, in *GetReportedVideosRequest, opts ...grpc.CallOption) (*GetReportedVideosResponse, error)
 	ReportVideo(ctx context.Context, in *ReportVideoRequest, opts ...grpc.CallOption) (*ReportVideoResponse, error)
 	FetchExclusiveVideo(ctx context.Context, in *FetchExclusiveVideoRequest, opts ...grpc.CallOption) (*FetchExclusiveVideoResponse, error)
+	VideoDetails(ctx context.Context, in *VideoDetailsRequest, opts ...grpc.CallOption) (*VideoDetailsResponse, error)
 }
 
 type videoServiceClient struct {
@@ -192,6 +194,15 @@ func (c *videoServiceClient) FetchExclusiveVideo(ctx context.Context, in *FetchE
 	return out, nil
 }
 
+func (c *videoServiceClient) VideoDetails(ctx context.Context, in *VideoDetailsRequest, opts ...grpc.CallOption) (*VideoDetailsResponse, error) {
+	out := new(VideoDetailsResponse)
+	err := c.cc.Invoke(ctx, VideoService_VideoDetails_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoServiceServer is the server API for VideoService service.
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility
@@ -208,6 +219,7 @@ type VideoServiceServer interface {
 	GetReportedVideos(context.Context, *GetReportedVideosRequest) (*GetReportedVideosResponse, error)
 	ReportVideo(context.Context, *ReportVideoRequest) (*ReportVideoResponse, error)
 	FetchExclusiveVideo(context.Context, *FetchExclusiveVideoRequest) (*FetchExclusiveVideoResponse, error)
+	VideoDetails(context.Context, *VideoDetailsRequest) (*VideoDetailsResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -250,6 +262,9 @@ func (UnimplementedVideoServiceServer) ReportVideo(context.Context, *ReportVideo
 }
 func (UnimplementedVideoServiceServer) FetchExclusiveVideo(context.Context, *FetchExclusiveVideoRequest) (*FetchExclusiveVideoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FetchExclusiveVideo not implemented")
+}
+func (UnimplementedVideoServiceServer) VideoDetails(context.Context, *VideoDetailsRequest) (*VideoDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VideoDetails not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 
@@ -488,6 +503,24 @@ func _VideoService_FetchExclusiveVideo_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_VideoDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VideoDetailsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).VideoDetails(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_VideoDetails_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).VideoDetails(ctx, req.(*VideoDetailsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoService_ServiceDesc is the grpc.ServiceDesc for VideoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -538,6 +571,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FetchExclusiveVideo",
 			Handler:    _VideoService_FetchExclusiveVideo_Handler,
+		},
+		{
+			MethodName: "VideoDetails",
+			Handler:    _VideoService_VideoDetails_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

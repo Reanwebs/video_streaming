@@ -17,6 +17,7 @@ service VideoService {
     rpc GetReportedVideos(GetReportedVideosRequest) returns (GetReportedVideosResponse) {}
     rpc ReportVideo(ReportVideoRequest) returns (ReportVideoResponse) {}
     rpc FetchExclusiveVideo(FetchExclusiveVideoRequest) returns (FetchExclusiveVideoResponse) {}
+    rpc VideoDetails(VideoDetailsRequest) returns (VideoDetailsResponse){}
 
 }
 
@@ -203,4 +204,14 @@ message Suggestion {
     bool exclusive = 12;
     uint32 coin_for_watch = 13;
     bool blocked = 14;
+}
+
+message VideoDetailsRequest{
+    string VideoID = 1;
+}
+
+message VideoDetailsResponse{
+    string OwnerID = 1;
+    int32 Coins   = 2;
+    string Title   = 3;
 }

@@ -17,4 +17,5 @@ type VideoRepo interface {
 	GetReportedVideos() ([]domain.ReportedVideo, error)
 	ReportVideo(input *pb.ReportVideoRequest) (bool, error)
 	FetchExclusiveVideos() ([]*domain.Video, error)
+	VideoDetails(string) (*domain.Video, error)
 }
