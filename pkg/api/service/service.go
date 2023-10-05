@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 	clientinterfaces "videoStreaming/pkg/client/clientInterfaces"
@@ -210,22 +209,28 @@ func (c *VideoServer) ArchiveVideo(ctx context.Context, input *pb.ArchiveVideoRe
 
 func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRequest) (*pb.GetVideoByIdResponse, error) {
 
-	res, isStarred, err := c.Repo.GetVideoById(input.VideoId, input.UserName)
+	res, isStarred, sug, err := c.Repo.GetVideoById(input.VideoId, input.UserName)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.Exclusive {
-		err := c.MonitClient.ExclusiveContent(ctx, domain.ExclusiveContentRequest{
-			UserID:    input.UserId,
-			VideoID:   res.Video_id,
-			Reason:    "paid",
-			Owner:     res.UserId,
-			PaidCoins: uint32(res.Coin_for_watch),
-		})
-		if err != nil {
-			log.Println(" failed to add reward")
-			return nil, errors.New("insuffient coins to watch exclusive content")
+	suggestions := make([]*pb.Suggestion, len(sug))
+	for i, v := range sug {
+		suggestions[i] = &pb.Suggestion{
+			VideoId:      v.Video_id,
+			UserName:     v.UserId,
+			AvatarId:     v.Avatar_id,
+			Intrest:      v.Interest,
+			ThumbnailId:  v.Thumbnail_id,
+			Title:        v.Title,
+			S3Path:       v.S3_path,
+			Archived:     v.Archived,
+			Views:        uint32(v.Views),
+			Starred:      uint32(v.Starred),
+			Discription:  v.Discription,
+			Exclusive:    v.Exclusive,
+			CoinForWatch: uint32(v.Coin_for_watch),
+			Blocked:      v.Blocked,
 		}
 	}
 
@@ -245,6 +250,7 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 		Exclusive:    res.Exclusive,
 		CoinForWatch: uint32(res.Coin_for_watch),
 		Blocked:      res.Blocked,
+		Suggestions:  suggestions,
 	}
 	if res.Views >= 100 {
 		reward := res.Views % 100

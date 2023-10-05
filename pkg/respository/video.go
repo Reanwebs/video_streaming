@@ -112,14 +112,14 @@ func (c *videoRepo) FetchAllVideos() ([]*domain.Video, error) {
 	return data, nil
 }
 
-func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, bool, error) {
+func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, bool, []*domain.Video, error) {
 	var video domain.Video
 	isStarred := true
 	if err := c.DB.Where("video_id = ?", id).First(&video).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, false, fmt.Errorf("Video with ID %s not found", id)
+			return nil, false, nil, fmt.Errorf("Video with ID %s not found", id)
 		}
-		return nil, false, err
+		return nil, false, nil, err
 	}
 
 	var star domain.Star
@@ -131,7 +131,7 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 	video.Views++
 	if err := c.DB.Save(&video).Error; err != nil {
 		fmt.Println("error in Increment the view count")
-		return nil, false, err
+		return nil, false, nil, err
 	}
 	fmt.Println(" Increment the view count")
 
@@ -141,9 +141,22 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 		Timestamp: time.Now(),
 	}
 	if err := c.DB.Create(&view).Error; err != nil {
-		return nil, false, err
+		return nil, false, nil, err
 	}
-	return &video, isStarred, nil
+
+	var suggestions []*domain.Video
+	if err := c.DB.Model(&domain.Video{}).
+		Where("archived = ? AND blocked = ? AND exclusive = ? AND interest", false, false, false, video.Interest).
+		Find(&suggestions).
+		Error; err != nil {
+		return nil, false, nil, err
+	}
+
+	if len(suggestions) > 3 {
+		suggestions = suggestions[:3]
+	}
+
+	return &video, isStarred, suggestions, nil
 }
 
 func (c *videoRepo) ToggleStar(id string, userName string, starred bool) (bool, error) {

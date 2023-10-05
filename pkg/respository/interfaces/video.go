@@ -11,7 +11,7 @@ type VideoRepo interface {
 	FindArchivedVideos(userName string) ([]*domain.Video, error)
 	ArchivedVideos(VideoId uint) (bool, error)
 	FetchAllVideos() ([]*domain.Video, error)
-	GetVideoById(string, string) (*domain.Video, bool, error)
+	GetVideoById(string, string) (*domain.Video, bool, []*domain.Video, error)
 	ToggleStar(string, string, bool) (bool, error)
 	BlockVideo(domain.BlockedVideo) (bool, error)
 	GetReportedVideos() ([]domain.ReportedVideo, error)
