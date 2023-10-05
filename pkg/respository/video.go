@@ -146,7 +146,7 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 
 	var suggestions []*domain.Video
 	if err := c.DB.Model(&domain.Video{}).
-		Where("archived = ? AND blocked = ? AND exclusive = ? AND interest", false, false, false, video.Interest).
+		Where("archived = ? AND blocked = ? AND exclusive = ? AND interest = ?", false, false, false, video.Interest).
 		Find(&suggestions).
 		Error; err != nil {
 		return nil, false, nil, err
