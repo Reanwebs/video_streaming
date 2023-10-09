@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 	clientinterfaces "videoStreaming/pkg/client/clientInterfaces"
@@ -263,7 +263,7 @@ func (c *VideoServer) GetVideoById(ctx context.Context, input *pb.GetVideoByIdRe
 				PaidCoins: 0,
 			})
 			if err != nil {
-				fmt.Println(" failed to add reward")
+				log.Println(" failed to add reward")
 			}
 		}
 	}

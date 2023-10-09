@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 	"videoStreaming/pkg/domain"
@@ -57,7 +58,7 @@ func (c *videoRepo) FetchUserVideos(userName string) ([]*domain.Video, error) {
 	}
 
 	if len(data) == 0 {
-		fmt.Println("Fetching empty array")
+		log.Println("Fetching empty array")
 		return []*domain.Video{}, nil
 	}
 	return data, nil
@@ -73,7 +74,7 @@ func (c *videoRepo) FindArchivedVideos(userName string) ([]*domain.Video, error)
 	}
 
 	if len(data) == 0 {
-		fmt.Println("fetching empty array")
+		log.Println("fetching empty array")
 		return []*domain.Video{}, nil
 	}
 
@@ -103,9 +104,8 @@ func (c *videoRepo) FetchAllVideos() ([]*domain.Video, error) {
 		Error; err != nil {
 		return nil, err
 	}
-	fmt.Println("\nall")
 	if len(data) == 0 {
-		fmt.Println("Fetching empty array")
+		log.Println("Fetching empty array")
 		return []*domain.Video{}, nil
 	}
 
@@ -130,10 +130,9 @@ func (c *videoRepo) GetVideoById(id string, userName string) (*domain.Video, boo
 
 	video.Views++
 	if err := c.DB.Save(&video).Error; err != nil {
-		fmt.Println("error in Increment the view count")
+		log.Println("error in Increment the view count")
 		return nil, false, nil, err
 	}
-	fmt.Println(" Increment the view count")
 
 	view := domain.Viewer{
 		VideoID:   id,
@@ -306,7 +305,7 @@ func (c *videoRepo) FetchExclusiveVideos() ([]*domain.Video, error) {
 	}
 
 	if len(videos) == 0 {
-		fmt.Println("Fetching empty array")
+		log.Println("Fetching empty array")
 		return []*domain.Video{}, nil
 	}
 

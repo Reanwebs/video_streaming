@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"log"
 	clientinterfaces "videoStreaming/pkg/client/clientInterfaces"
 	"videoStreaming/pkg/config"
 	"videoStreaming/pkg/domain"
@@ -19,7 +19,7 @@ type monitClient struct {
 func InitClient(c *config.Config) (clientinterfaces.MonitClient, error) {
 	cc, err := grpc.Dial(c.MONIT_SVC, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		fmt.Println("\n\nmonitClient calling failed ")
+		log.Println(err)
 		return nil, err
 	}
 	return NewMonitClient(monit.NewMonitizationClient(cc)), nil
@@ -36,7 +36,6 @@ func (m *monitClient) HealthCheck(ctx context.Context) (string, error) {
 }
 
 func (m *monitClient) VideoReward(ctx context.Context, request domain.VideoRewardRequest) error {
-	fmt.Println("VideoReward")
 	_, err := m.Server.VideoReward(ctx, &monit.VideoRewardRequest{
 		UserID:    request.UserID,
 		VideoID:   request.VideoID,
