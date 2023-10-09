@@ -196,7 +196,7 @@ func (c *VideoServer) FetchAllVideo(ctx context.Context, input *pb.FetchAllVideo
 
 func (c *VideoServer) ArchiveVideo(ctx context.Context, input *pb.ArchiveVideoRequest) (*pb.ArchiveVideoResponse, error) {
 
-	res, err := c.Repo.ArchivedVideos(uint(input.VideoId))
+	res, err := c.Repo.ArchivedVideos(input.VideoId)
 	if err != nil {
 		return nil, err
 	}

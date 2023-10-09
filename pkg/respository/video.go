@@ -81,7 +81,7 @@ func (c *videoRepo) FindArchivedVideos(userName string) ([]*domain.Video, error)
 	return data, nil
 }
 
-func (c *videoRepo) ArchivedVideos(VideoId uint) (bool, error) {
+func (c *videoRepo) ArchivedVideos(VideoId string) (bool, error) {
 	var video domain.Video
 	if err := c.DB.First(&video, VideoId).Error; err != nil {
 		return false, err

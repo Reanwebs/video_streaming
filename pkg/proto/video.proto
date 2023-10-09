@@ -121,7 +121,7 @@ message GetVideoByIdResponse {
 }
 
 message ArchiveVideoRequest {
-    uint32 videoId = 1;
+    string videoId = 1;
 }
 message ArchiveVideoResponse{
     bool status = 1;
