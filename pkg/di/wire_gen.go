@@ -28,7 +28,7 @@ func InitializeServe(c *config.Config) (*api.Server, error) {
 		return nil, err
 	}
 	videoServiceServer := service.NewVideoServer(videoRepo, monitClient)
-	server, err := api.NewgrpcServe(c, videoServiceServer, monitClient)
+	server, err := api.NewgrpcServer(c, videoServiceServer, monitClient)
 	if err != nil {
 		return nil, err
 	}

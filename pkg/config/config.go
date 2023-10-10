@@ -11,6 +11,7 @@ type Config struct {
 	Port                  string `mapstructure:"PORT"`
 	AWS_ACCESS_KEY_ID     string `mapstructure:"AWS_ACCESS_KEY_ID"`
 	AWS_SECRET_ACCESS_KEY string `mapstructure:"AWS_SECRET_ACCESS_KEY"`
+	Region                string `mapstructure:"REGION"`
 	MONIT_SVC             string `mapstructure:"MONIT_SVC"`
 }
 
