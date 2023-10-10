@@ -18,7 +18,7 @@ func UploadVideoToS3(videoData []byte, s3Path string) error {
 
 	// Create a new AWS session with the loaded access keys
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("ap-south-1"),
+		Region: aws.String(os.Getenv("REGION")),
 		Credentials: credentials.NewStaticCredentials(
 			os.Getenv("AWS_ACCESS_KEY_ID"),
 			os.Getenv("AWS_SECRET_ACCESS_KEY"),
