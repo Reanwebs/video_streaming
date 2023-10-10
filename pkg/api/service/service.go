@@ -368,6 +368,7 @@ func (c *VideoServer) FetchExclusiveVideo(ctx context.Context, input *pb.FetchEx
 			Exclusive:    v.Exclusive,
 			Blocked:      v.Blocked,
 			CoinForWatch: uint32(v.Coin_for_watch),
+			OwnerId:      v.UserId,
 		}
 	}
 
